@@ -1,0 +1,32 @@
+{
+  "name": "react-ca-seq-demo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "yarn run build:babel && yarn run build:uglify",
+    "build:babel": "browserify ./src/app.jsx -t babelify -o ./dist/app.js",
+    "build:uglify": "uglifyjs dist/app.js --compress -o dist/app.min.js",
+    "watchify": "watchify ./src/app.jsx -t babelify -o ./dist/app.js",
+    "watch": "yarn run watchify && yarn run build:uglify",
+    "browser-sync": "browser-sync start --server --files dist/*",
+    "start": "yarn run watch & yarn run browser-sync"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "lodash": "^4.17.2",
+    "react": "^15.4.0",
+    "react-dom": "^15.4.0",
+    "redux": "^3.6.0",
+    "sleep-async": "^1.0.1"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-react": "^6.16.0",
+    "babelify": "^7.3.0",
+    "browserify": "^13.1.1",
+    "uglifyjs": "^2.4.10",
+    "watchify": "^3.7.0",
+    "browser-sync": "^2.17.5"
+  }
+}
