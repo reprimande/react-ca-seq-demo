@@ -6,8 +6,8 @@ class Acid {
     this._decay = 0.1
     this._filter = this._ctx.createBiquadFilter()
     this._filter.type = 'lowpass'
-    this._filter.frequency.value = 2000
-    this._filter.Q.value = 10
+    this._filter.frequency.value = 1000
+    this._filter.Q.value = 20
 
     this._gain = this._ctx.createGain()
     this._gain.gain.value = 0
@@ -26,13 +26,12 @@ class Acid {
 
     this._osc.connect(this._filter)
 
-
     this._osc.frequency.setValueAtTime(this.m2f(note), t)
 
     this._filter.frequency.cancelScheduledValues(0)
     this._filter.frequency.setValueAtTime(0, t)
-    this._filter.frequency.linearRampToValueAtTime(2000, t)
-    this._filter.frequency.exponentialRampToValueAtTime(500, t + this._decay)
+    this._filter.frequency.linearRampToValueAtTime(3000, t)
+    this._filter.frequency.exponentialRampToValueAtTime(1000, t + this._decay)
 
     this._gain.gain.cancelScheduledValues(0)
     this._gain.gain.setValueAtTime(0, t)

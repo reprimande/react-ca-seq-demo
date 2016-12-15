@@ -115,3 +115,5 @@ export class CA {
     return _.map(this._cells, (row) => { return _.map(row, (cell) => { return cell.value } ) })
   }
 }
+
+export default CA
