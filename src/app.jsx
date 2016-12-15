@@ -1,15 +1,15 @@
 import React from 'react'
 import { render } from 'react-dom'
-import { createStore } from 'redux'
 import _ from 'lodash'
 import EventEmitter from 'events'
 
 import { CA } from './ca'
-import Kick from './kick'
-import Snare from './snare'
-import Hihat from './hihat'
-import Acid from './acid'
+import Kick from './synth/kick'
+import Snare from './synth/snare'
+import Hihat from './synth/hihat'
+import Acid from './synth/acid'
 
+import Board from './components/board.jsx'
 
 const ctx = new AudioContext(),
       k = new Kick(ctx),
@@ -97,116 +97,6 @@ class Actions {
   }
 }
 
-class Cell extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      color: "white",
-      value: 0,
-      focus: false
-    }
-  }
-  componentDidMount() {
-    this.setState({
-      value: this.props.cell.value,
-    })
-    this.props.cell.on('change', (val) => {
-      this.updateCell(val)
-    })
-    this.props.sequencer.on('step', (step) => {
-      this.setState({focus: (this.props.cell.x === step)})
-    })
-    this._onClick = this._onClick.bind(this);
-  }
-
-  updateCell(value) {
-    this.setState({
-      value: value
-    })
-  }
-
-  getColorFromState(value) {
-    const colors = ['white', 'blue']
-    return colors[value]
-  }
-
-  _onClick(e) {
-    this.props.cell.update()
-  }
-
-  render() {
-    const colors = ['white', 'blue']
-    const cellStyle = {
-      backgroundColor: colors[this.state.value],
-      borderStyle: "none",
-      //borderWidth: "1px",
-      padding: "0px",
-      margin: "0px"
-    }
-    const focusStyle = {
-      backgroundColor: 'red',
-      opacity: '0.3',
-      borderStyle: "none",
-      padding: "0px",
-      margin: "0px",
-      zIndex: '999',
-      display: 'inline-block',
-      width: '100%',
-      height: '100%'
-    }
-    let focus = ""
-    if (this.state.focus) {
-      focus = (<div style={focusStyle}></div>)
-    }
-    return (<td style={cellStyle} onClick={this._onClick}>{focus}</td>)
-  }
-}
-
-class Row extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { row: this.props.row }
-  }
-
-  render() {
-    const cells = this.state.row.map((cell) => { return <Cell cell={cell} sequencer={this.props.sequencer} />})
-    return (<tr>{cells}</tr>)
-  }
-}
-
-class Board extends React.Component {
-  constructor(prop) {
-    super(prop)
-    this.state = { cells: [] }
-  }
-
-  componentDidMount() {
-    this.setState({
-      cells: this.props.cells
-    })
-  }
-
-  render() {
-    const style = {
-      backgroundColor: "orange",
-      borderStyle: "none",
-      //borderWidth: "1px",
-      width: "512px",
-      height: "512px",
-      padding: "0px",
-      margin: "0px"
-    }
-    console.log(this.props)
-    const rows = this.state.cells.map((row) => {
-      return (<Row row={row} sequencer={this.props.sequencer} />)
-    })
-    return (
-      <table style={ style }>
-        {rows}
-      </table>
-    )
-  }
-}
 
 
 class Controller extends React.Component {
