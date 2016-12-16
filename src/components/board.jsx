@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { Component, PropTypes } from 'react'
 import Row from './row.jsx'
 
-class Board extends React.Component {
-  constructor(prop) {
-    super(prop)
+class Board extends Component {
+  static propTypes = {
+    cells: PropTypes.array.isRequired,
+    actions: PropTypes.object.isRequired
   }
 
-  componentDidMount() {
+  handleCellClick(x, y) {
+    this.props.actions.updateCell(x, y)
   }
 
   render() {
@@ -19,8 +21,8 @@ class Board extends React.Component {
       padding: "0px",
       margin: "0px"
     }
-    const rows = this.props.cells.map((row) => {
-      return (<Row row={row} sequencer={this.props.sequencer} />)
+    const rows = this.props.cells.map((row, i) => {
+      return (<Row row={row} y={i} onCellClick={(x, y) => this.handleCellClick(x, y)}/>)
     })
     return (
       <table style={ style }>

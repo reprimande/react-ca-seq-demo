@@ -1,22 +1,21 @@
-import React from 'react'
+import React, { Component, PropTypes } from 'react'
 
-class Cell extends React.Component {
-  constructor(props) {
-    super(props)
+class Cell extends Component {
+  static propTypes = {
+    cell: PropTypes.number.isRequired,
+    x:  PropTypes.number.isRequired,
+    y:  PropTypes.number.isRequired,
+    onCellClick: PropTypes.func
   }
 
-  componentDidMount() {
-    this._onClick = this._onClick.bind(this);
-  }
-
-  _onClick(e) {
-    this.props.cell.update()
+  handleClick(e) {
+    this.props.onCellClick && this.props.onCellClick(this.props.x, this.props.y)
   }
 
   render() {
     const colors = ['white', 'blue']
     const cellStyle = {
-      backgroundColor: colors[this.props.cell.value],
+      backgroundColor: colors[this.props.cell],
       borderStyle: "none",
       //borderWidth: "1px",
       padding: "0px",
@@ -37,7 +36,7 @@ class Cell extends React.Component {
     if (this.props.focus) {
       focus = (<div style={focusStyle}></div>)
     }
-    return (<td style={cellStyle} onClick={this._onClick}>{focus}</td>)
+    return (<td style={cellStyle} onClick={() => this.handleClick()}>{focus}</td>)
   }
 }
 

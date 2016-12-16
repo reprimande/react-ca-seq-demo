@@ -1,21 +1,20 @@
 import React from 'react'
-import Actions from '../actions/action'
 
 class Controller extends React.Component {
   _onClickStart() {
-    Actions.start()
+
   }
 
   _onClickStop() {
-    Actions.stop()
+
   }
 
   _onClickClear() {
-    Actions.clear()
+
   }
 
   _onClickRandom() {
-    Actions.random()
+
   }
   render() {
     return (
