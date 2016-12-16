@@ -41,8 +41,9 @@ class Cell extends EventEmitter {
   }
 }
 
-export class CA {
+class CA extends EventEmitter  {
   constructor(h = 4, w = 4, cells = [[0,1,0,0],[0,0,1,0],[0,1,0,0],[0,0,0,1]], threashold = 2, max = 1) {
+    super()
     this._cells = _.times(h, (y) => {
       return _.times(w, (x) => {
         return new Cell(x, y, cells[y][x], max)
@@ -63,6 +64,7 @@ export class CA {
 
   process() {
     this._process(this._cells)
+    this.emit('change', this.cells)
   }
 
   _process(cells) {

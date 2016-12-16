@@ -4,13 +4,9 @@ import Row from './row.jsx'
 class Board extends React.Component {
   constructor(prop) {
     super(prop)
-    this.state = { cells: [] }
   }
 
   componentDidMount() {
-    this.setState({
-      cells: this.props.cells
-    })
   }
 
   render() {
@@ -23,8 +19,7 @@ class Board extends React.Component {
       padding: "0px",
       margin: "0px"
     }
-    console.log(this.props)
-    const rows = this.state.cells.map((row) => {
+    const rows = this.props.cells.map((row) => {
       return (<Row row={row} sequencer={this.props.sequencer} />)
     })
     return (

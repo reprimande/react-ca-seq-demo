@@ -37823,51 +37823,43 @@ module.exports = require('./lib/React');
 },{"./lib/React":157}],180:[function(require,module,exports){
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactDom = require('react-dom');
 
 var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _events = require('events');
+var _ca = require('../ca');
 
-var _events2 = _interopRequireDefault(_events);
+var _ca2 = _interopRequireDefault(_ca);
 
-var _ca = require('./ca');
+var _sequencer = require('../sequencer');
 
-var _kick = require('./synth/kick');
+var _sequencer2 = _interopRequireDefault(_sequencer);
+
+var _kick = require('../synth/kick');
 
 var _kick2 = _interopRequireDefault(_kick);
 
-var _snare = require('./synth/snare');
+var _snare = require('../synth/snare');
 
 var _snare2 = _interopRequireDefault(_snare);
 
-var _hihat = require('./synth/hihat');
+var _hihat = require('../synth/hihat');
 
 var _hihat2 = _interopRequireDefault(_hihat);
 
-var _acid = require('./synth/acid');
+var _acid = require('../synth/acid');
 
 var _acid2 = _interopRequireDefault(_acid);
-
-var _board = require('./components/board.jsx');
-
-var _board2 = _interopRequireDefault(_board);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var ctx = new AudioContext(),
     k = new _kick2.default(ctx),
@@ -37876,65 +37868,17 @@ var ctx = new AudioContext(),
     b = new _acid2.default(ctx),
     mapping = [b, b, b, b, b, b, b, b, h, h, h, s, s, k, k, k];
 
-var Sequencer = function (_EventEmitter) {
-  _inherits(Sequencer, _EventEmitter);
-
-  function Sequencer(length) {
-    _classCallCheck(this, Sequencer);
-
-    var _this = _possibleConstructorReturn(this, (Sequencer.__proto__ || Object.getPrototypeOf(Sequencer)).call(this));
-
-    _this._length = length;
-    _this._step = 0;
-    _this._isActive = false;
-    return _this;
-  }
-
-  _createClass(Sequencer, [{
-    key: 'start',
-    value: function start() {
-      var _this2 = this;
-
-      if (!this._isActive) {
-        this._step = 0;
-        this._t = setInterval(function () {
-          _this2.process();
-        }, 100);
-        this._isActive = true;
-      }
-    }
-  }, {
-    key: 'stop',
-    value: function stop() {
-      if (this._isActive) {
-        clearInterval(this._t);
-        this._step = 0;
-        this._isActive = false;
-      }
-    }
-  }, {
-    key: 'process',
-    value: function process() {
-      this._step++;
-      this.emit('step', this._step % this._length);
-    }
-  }]);
-
-  return Sequencer;
-}(_events2.default);
-
 var num = 16,
     vals = _lodash2.default.times(num, function () {
   return _lodash2.default.times(num, function () {
     return Math.floor(Math.random() * 2);
   });
 }),
-    ca = new _ca.CA(num, num, vals, 2),
-    sequencer = new Sequencer(num);
+    ca = new _ca2.default(num, num, vals, 2),
+    sequencer = new _sequencer2.default(num);
 
 sequencer.on('step', function (step) {
   ca.process();
-
   _lodash2.default.uniqBy(_lodash2.default.flatten(ca.cells).filter(function (cell) {
     return cell.x === step;
   }).filter(function (cell) {
@@ -37943,7 +37887,7 @@ sequencer.on('step', function (step) {
     return { 'synth': mapping[cell.y], 'y': cell.y };
   }), 'synth').forEach(function (s) {
     if (s.synth === b) {
-      s.synth.play([11, 9, 7, 6, 4, 2, 0][s.y] + 36);
+      s.synth.play([11, 9, 7, 6, 4, 2, 0][s.y] + 24);
     } else {
       s.synth.play();
     }
@@ -37982,34 +37926,148 @@ var Actions = function () {
   return Actions;
 }();
 
-var Controller = function (_React$Component) {
-  _inherits(Controller, _React$Component);
+exports.default = Actions;
 
-  function Controller() {
-    _classCallCheck(this, Controller);
+},{"../ca":182,"../sequencer":187,"../synth/acid":188,"../synth/hihat":189,"../synth/kick":190,"../synth/snare":191,"lodash":25}],181:[function(require,module,exports){
+'use strict';
 
-    return _possibleConstructorReturn(this, (Controller.__proto__ || Object.getPrototypeOf(Controller)).apply(this, arguments));
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require('react-dom');
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _board = require('./components/board.jsx');
+
+var _board2 = _interopRequireDefault(_board);
+
+var _controller = require('./components/controller.jsx');
+
+var _controller2 = _interopRequireDefault(_controller);
+
+var _ca = require('./ca');
+
+var _ca2 = _interopRequireDefault(_ca);
+
+var _sequencer = require('./sequencer');
+
+var _sequencer2 = _interopRequireDefault(_sequencer);
+
+var _kick = require('./synth/kick');
+
+var _kick2 = _interopRequireDefault(_kick);
+
+var _snare = require('./synth/snare');
+
+var _snare2 = _interopRequireDefault(_snare);
+
+var _hihat = require('./synth/hihat');
+
+var _hihat2 = _interopRequireDefault(_hihat);
+
+var _acid = require('./synth/acid');
+
+var _acid2 = _interopRequireDefault(_acid);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Actions = function () {
+  function Actions() {
+    _classCallCheck(this, Actions);
   }
 
-  _createClass(Controller, [{
-    key: '_onClickStart',
-    value: function _onClickStart() {
-      Actions.start();
+  _createClass(Actions, null, [{
+    key: 'start',
+    value: function start() {
+      sequencer.start();
     }
   }, {
-    key: '_onClickStop',
-    value: function _onClickStop() {
-      Actions.stop();
+    key: 'stop',
+    value: function stop() {
+      sequencer.stop();
     }
   }, {
-    key: '_onClickClear',
-    value: function _onClickClear() {
-      Actions.clear();
+    key: 'clear',
+    value: function clear() {
+      ca.clear();
     }
   }, {
-    key: '_onClickRandom',
-    value: function _onClickRandom() {
-      Actions.random();
+    key: 'random',
+    value: function random() {
+      _lodash2.default.flatten(ca.cells).forEach(function (cell) {
+        cell.value = Math.floor(Math.random() * 2);
+      });
+    }
+  }]);
+
+  return Actions;
+}();
+
+var App = function (_React$Component) {
+  _inherits(App, _React$Component);
+
+  function App(prop) {
+    _classCallCheck(this, App);
+
+    var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, prop));
+
+    var vals = _lodash2.default.times(16, function () {
+      return _lodash2.default.times(16, function () {
+        return Math.floor(Math.random() * 2);
+      });
+    });
+    _this.ca = new _ca2.default(16, 16, vals, 2);
+    _this.sequencer = new _sequencer2.default(16);
+    _this.state = {
+      cells: _this.ca.cells
+    };
+    return _this;
+  }
+
+  _createClass(App, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      /* const ctx = new AudioContext(),
+         k = new Kick(ctx),
+         s = new Snare(ctx),
+         h = new Hihat(ctx),
+         b = new Acid(ctx),
+         mapping = [
+         b,b,b,b,b,b,b,b,h,h,h,s,s,k,k,k
+         ] */
+      this.ca.on('change', function (cells) {
+        _this2.setState({ cells: cells });
+      });
+      this.sequencer.on('step', function (step) {
+        _this2.ca.process();
+        /* _.uniqBy(
+           _.flatten(ca.cells)
+           .filter((cell) => { return cell.x === step })
+           .filter((cell) => { return cell.value !== 0 })
+           .map((cell) => { return { 'synth': mapping[cell.y], 'y': cell.y }})
+           ,'synth').forEach((s) => {
+           if (s.synth === b) {
+           s.synth.play([11,9,7,6,4,2,0][s.y] + 24)
+           } else {
+           s.synth.play()
+           }
+           }) */
+      });
+      this.sequencer.start();
     }
   }, {
     key: 'render',
@@ -38017,49 +38075,23 @@ var Controller = function (_React$Component) {
       return _react2.default.createElement(
         'div',
         null,
-        _react2.default.createElement(
-          'button',
-          { onClick: this._onClickStart },
-          'start'
-        ),
-        _react2.default.createElement(
-          'button',
-          { onClick: this._onClickStop },
-          'stop'
-        ),
-        _react2.default.createElement(
-          'button',
-          { onClick: this._onClickClear },
-          'clear'
-        ),
-        _react2.default.createElement(
-          'button',
-          { onClick: this._onClickRandom },
-          'random'
-        )
+        _react2.default.createElement(_controller2.default, null),
+        _react2.default.createElement(_board2.default, { cells: this.state.cells })
       );
     }
   }]);
 
-  return Controller;
+  return App;
 }(_react2.default.Component);
 
-(0, _reactDom.render)(_react2.default.createElement(
-  'div',
-  null,
-  _react2.default.createElement(Controller, null),
-  _react2.default.createElement(_board2.default, { cells: ca.cells, sequencer: sequencer })
-), document.getElementById('c'));
+(0, _reactDom.render)(_react2.default.createElement(App, null), document.getElementById('c'));
 
-sequencer.start();
-
-},{"./ca":181,"./components/board.jsx":182,"./synth/acid":185,"./synth/hihat":186,"./synth/kick":187,"./synth/snare":188,"events":1,"lodash":25,"react":179,"react-dom":28}],181:[function(require,module,exports){
+},{"./ca":182,"./components/board.jsx":183,"./components/controller.jsx":185,"./sequencer":187,"./synth/acid":188,"./synth/hihat":189,"./synth/kick":190,"./synth/snare":191,"lodash":25,"react":179,"react-dom":28}],182:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.CA = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -38137,7 +38169,9 @@ var Cell = function (_EventEmitter) {
   return Cell;
 }(_events2.default);
 
-var CA = exports.CA = function () {
+var CA = function (_EventEmitter2) {
+  _inherits(CA, _EventEmitter2);
+
   function CA() {
     var h = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 4;
     var w = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 4;
@@ -38147,14 +38181,17 @@ var CA = exports.CA = function () {
 
     _classCallCheck(this, CA);
 
-    this._cells = _lodash2.default.times(h, function (y) {
+    var _this2 = _possibleConstructorReturn(this, (CA.__proto__ || Object.getPrototypeOf(CA)).call(this));
+
+    _this2._cells = _lodash2.default.times(h, function (y) {
       return _lodash2.default.times(w, function (x) {
         return new Cell(x, y, cells[y][x], max);
       });
     });
-    this._w = w;
-    this._h = h;
-    this._threashold = threashold;
+    _this2._w = w;
+    _this2._h = h;
+    _this2._threashold = threashold;
+    return _this2;
   }
 
   _createClass(CA, [{
@@ -38170,15 +38207,16 @@ var CA = exports.CA = function () {
     key: 'process',
     value: function process() {
       this._process(this._cells);
+      this.emit('change', this.cells);
     }
   }, {
     key: '_process',
     value: function _process(cells) {
-      var _this2 = this;
+      var _this3 = this;
 
       var targets = cells.map(function (row) {
         return row.filter(function (cell) {
-          return _this2.check(cell);
+          return _this3.check(cell);
         });
       });
       _lodash2.default.flatten(targets).forEach(function (cell) {
@@ -38233,9 +38271,11 @@ var CA = exports.CA = function () {
   }]);
 
   return CA;
-}();
+}(_events2.default);
 
-},{"events":1,"lodash":25}],182:[function(require,module,exports){
+exports.default = CA;
+
+},{"events":1,"lodash":25}],183:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38266,19 +38306,12 @@ var Board = function (_React$Component) {
   function Board(prop) {
     _classCallCheck(this, Board);
 
-    var _this = _possibleConstructorReturn(this, (Board.__proto__ || Object.getPrototypeOf(Board)).call(this, prop));
-
-    _this.state = { cells: [] };
-    return _this;
+    return _possibleConstructorReturn(this, (Board.__proto__ || Object.getPrototypeOf(Board)).call(this, prop));
   }
 
   _createClass(Board, [{
     key: 'componentDidMount',
-    value: function componentDidMount() {
-      this.setState({
-        cells: this.props.cells
-      });
-    }
+    value: function componentDidMount() {}
   }, {
     key: 'render',
     value: function render() {
@@ -38293,8 +38326,7 @@ var Board = function (_React$Component) {
         padding: "0px",
         margin: "0px"
       };
-      console.log(this.props);
-      var rows = this.state.cells.map(function (row) {
+      var rows = this.props.cells.map(function (row) {
         return _react2.default.createElement(_row2.default, { row: row, sequencer: _this2.props.sequencer });
       });
       return _react2.default.createElement(
@@ -38310,7 +38342,7 @@ var Board = function (_React$Component) {
 
 exports.default = Board;
 
-},{"./row.jsx":184,"react":179}],183:[function(require,module,exports){
+},{"./row.jsx":186,"react":179}],184:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38337,44 +38369,13 @@ var Cell = function (_React$Component) {
   function Cell(props) {
     _classCallCheck(this, Cell);
 
-    var _this = _possibleConstructorReturn(this, (Cell.__proto__ || Object.getPrototypeOf(Cell)).call(this, props));
-
-    _this.state = {
-      color: "white",
-      value: 0,
-      focus: false
-    };
-    return _this;
+    return _possibleConstructorReturn(this, (Cell.__proto__ || Object.getPrototypeOf(Cell)).call(this, props));
   }
 
   _createClass(Cell, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var _this2 = this;
-
-      this.setState({
-        value: this.props.cell.value
-      });
-      this.props.cell.on('change', function (val) {
-        _this2.updateCell(val);
-      });
-      this.props.sequencer.on('step', function (step) {
-        _this2.setState({ focus: _this2.props.cell.x === step });
-      });
       this._onClick = this._onClick.bind(this);
-    }
-  }, {
-    key: 'updateCell',
-    value: function updateCell(value) {
-      this.setState({
-        value: value
-      });
-    }
-  }, {
-    key: 'getColorFromState',
-    value: function getColorFromState(value) {
-      var colors = ['white', 'blue'];
-      return colors[value];
     }
   }, {
     key: '_onClick',
@@ -38386,7 +38387,7 @@ var Cell = function (_React$Component) {
     value: function render() {
       var colors = ['white', 'blue'];
       var cellStyle = {
-        backgroundColor: colors[this.state.value],
+        backgroundColor: colors[this.props.cell.value],
         borderStyle: "none",
         //borderWidth: "1px",
         padding: "0px",
@@ -38404,7 +38405,7 @@ var Cell = function (_React$Component) {
         height: '100%'
       };
       var focus = "";
-      if (this.state.focus) {
+      if (this.props.focus) {
         focus = _react2.default.createElement('div', { style: focusStyle });
       }
       return _react2.default.createElement(
@@ -38420,7 +38421,96 @@ var Cell = function (_React$Component) {
 
 exports.default = Cell;
 
-},{"react":179}],184:[function(require,module,exports){
+},{"react":179}],185:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _action = require('../actions/action');
+
+var _action2 = _interopRequireDefault(_action);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Controller = function (_React$Component) {
+  _inherits(Controller, _React$Component);
+
+  function Controller() {
+    _classCallCheck(this, Controller);
+
+    return _possibleConstructorReturn(this, (Controller.__proto__ || Object.getPrototypeOf(Controller)).apply(this, arguments));
+  }
+
+  _createClass(Controller, [{
+    key: '_onClickStart',
+    value: function _onClickStart() {
+      _action2.default.start();
+    }
+  }, {
+    key: '_onClickStop',
+    value: function _onClickStop() {
+      _action2.default.stop();
+    }
+  }, {
+    key: '_onClickClear',
+    value: function _onClickClear() {
+      _action2.default.clear();
+    }
+  }, {
+    key: '_onClickRandom',
+    value: function _onClickRandom() {
+      _action2.default.random();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          'button',
+          { onClick: this._onClickStart },
+          'start'
+        ),
+        _react2.default.createElement(
+          'button',
+          { onClick: this._onClickStop },
+          'stop'
+        ),
+        _react2.default.createElement(
+          'button',
+          { onClick: this._onClickClear },
+          'clear'
+        ),
+        _react2.default.createElement(
+          'button',
+          { onClick: this._onClickRandom },
+          'random'
+        )
+      );
+    }
+  }]);
+
+  return Controller;
+}(_react2.default.Component);
+
+exports.default = Controller;
+
+},{"../actions/action":180,"react":179}],186:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38451,19 +38541,14 @@ var Row = function (_React$Component) {
   function Row(props) {
     _classCallCheck(this, Row);
 
-    var _this = _possibleConstructorReturn(this, (Row.__proto__ || Object.getPrototypeOf(Row)).call(this, props));
-
-    _this.state = { row: _this.props.row };
-    return _this;
+    return _possibleConstructorReturn(this, (Row.__proto__ || Object.getPrototypeOf(Row)).call(this, props));
   }
 
   _createClass(Row, [{
     key: 'render',
     value: function render() {
-      var _this2 = this;
-
-      var cells = this.state.row.map(function (cell) {
-        return _react2.default.createElement(_cell2.default, { cell: cell, sequencer: _this2.props.sequencer });
+      var cells = this.props.row.map(function (cell) {
+        return _react2.default.createElement(_cell2.default, { cell: cell });
       });
       return _react2.default.createElement(
         'tr',
@@ -38478,7 +38563,77 @@ var Row = function (_React$Component) {
 
 exports.default = Row;
 
-},{"./cell.jsx":183,"react":179}],185:[function(require,module,exports){
+},{"./cell.jsx":184,"react":179}],187:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _events = require('events');
+
+var _events2 = _interopRequireDefault(_events);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Sequencer = function (_EventEmitter) {
+  _inherits(Sequencer, _EventEmitter);
+
+  function Sequencer(length) {
+    _classCallCheck(this, Sequencer);
+
+    var _this = _possibleConstructorReturn(this, (Sequencer.__proto__ || Object.getPrototypeOf(Sequencer)).call(this));
+
+    _this._length = length;
+    _this._step = 0;
+    _this._isActive = false;
+    return _this;
+  }
+
+  _createClass(Sequencer, [{
+    key: 'start',
+    value: function start() {
+      var _this2 = this;
+
+      if (!this._isActive) {
+        this._step = 0;
+        this._t = setInterval(function () {
+          _this2.process();
+        }, 100);
+        this._isActive = true;
+      }
+    }
+  }, {
+    key: 'stop',
+    value: function stop() {
+      if (this._isActive) {
+        clearInterval(this._t);
+        this._step = 0;
+        this._isActive = false;
+      }
+    }
+  }, {
+    key: 'process',
+    value: function process() {
+      this._step++;
+      this.emit('step', this._step % this._length);
+    }
+  }]);
+
+  return Sequencer;
+}(_events2.default);
+
+exports.default = Sequencer;
+
+},{"events":1}],188:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38499,8 +38654,8 @@ var Acid = function () {
     this._decay = 0.1;
     this._filter = this._ctx.createBiquadFilter();
     this._filter.type = 'lowpass';
-    this._filter.frequency.value = 2000;
-    this._filter.Q.value = 10;
+    this._filter.frequency.value = 1000;
+    this._filter.Q.value = 20;
 
     this._gain = this._ctx.createGain();
     this._gain.gain.value = 0;
@@ -38529,8 +38684,8 @@ var Acid = function () {
 
       this._filter.frequency.cancelScheduledValues(0);
       this._filter.frequency.setValueAtTime(0, t);
-      this._filter.frequency.linearRampToValueAtTime(2000, t);
-      this._filter.frequency.exponentialRampToValueAtTime(500, t + this._decay);
+      this._filter.frequency.linearRampToValueAtTime(3000, t);
+      this._filter.frequency.exponentialRampToValueAtTime(1000, t + this._decay);
 
       this._gain.gain.cancelScheduledValues(0);
       this._gain.gain.setValueAtTime(0, t);
@@ -38547,7 +38702,7 @@ var Acid = function () {
 
 exports.default = Acid;
 
-},{}],186:[function(require,module,exports){
+},{}],189:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38610,7 +38765,7 @@ var Hihat = function () {
 
 exports.default = Hihat;
 
-},{}],187:[function(require,module,exports){
+},{}],190:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -38662,7 +38817,7 @@ var Kick = function () {
 
 exports.default = Kick;
 
-},{}],188:[function(require,module,exports){
+},{}],191:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38742,4 +38897,4 @@ var Snare = function () {
 
 exports.default = Snare;
 
-},{}]},{},[180]);
+},{}]},{},[181]);
