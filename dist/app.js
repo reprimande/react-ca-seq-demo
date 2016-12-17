@@ -40414,7 +40414,7 @@ var Controller = function (_Component) {
   }, {
     key: 'handleChangeBpm',
     value: function handleChangeBpm(e) {
-      this.props.actions.bpm(e.target.value);
+      this.props.actions.bpm(parseInt(e.target.value, 10));
     }
   }, {
     key: 'render',
@@ -40634,16 +40634,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var rowLabels = ['Synth C', 'Synth B', 'Synth A', 'Synth G', 'Synth F', 'Synth E', 'Synth D', 'Synth C', 'Open Hihat', 'Open Hihat', 'Close Hihat', 'Close Hihat', 'Snare', 'Snare', 'Kick', 'Kick'];
 
+var rootStyle = {
+  margin: '8px'
+};
+
+var titleStyle = {
+  fontSize: '24px'
+};
+
 var App = function App(_ref) {
   var cells = _ref.cells,
       sequencer = _ref.sequencer,
       actions = _ref.actions;
   return _react2.default.createElement(
     'div',
-    null,
+    { style: rootStyle },
     _react2.default.createElement(
       'h1',
-      null,
+      { style: titleStyle },
       'React/Redux Cellular Automaton Sequencer'
     ),
     _react2.default.createElement(_controller2.default, { actions: actions, bpm: sequencer.bpm }),

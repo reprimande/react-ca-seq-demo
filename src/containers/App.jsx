@@ -25,9 +25,17 @@ const rowLabels = [
   'Kick'
 ]
 
+const rootStyle = {
+  margin: '8px'
+}
+
+const titleStyle = {
+  fontSize: '24px'
+}
+
 const App = ({cells, sequencer, actions}) => (
-  <div>
-    <h1>React/Redux Cellular Automaton Sequencer</h1>
+  <div style={rootStyle}>
+    <h1 style={titleStyle}>React/Redux Cellular Automaton Sequencer</h1>
     <Controller actions={actions} bpm={sequencer.bpm} />
     <Board cells={cells} sequencer={sequencer} actions={actions} rowLabels={rowLabels}/>
   </div>

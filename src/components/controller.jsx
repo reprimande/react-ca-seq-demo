@@ -23,7 +23,7 @@ class Controller extends Component {
   }
 
   handleChangeBpm(e) {
-    this.props.actions.bpm(e.target.value)
+    this.props.actions.bpm(parseInt(e.target.value, 10))
   }
 
   render() {
