@@ -16,8 +16,8 @@ class Board extends Component {
       backgroundColor: "orange",
       borderStyle: "none",
       //borderWidth: "1px",
-      width: "512px",
-      height: "512px",
+      width: "256px",
+      height: "256px",
       padding: "0px",
       margin: "0px"
     }

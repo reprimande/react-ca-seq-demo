@@ -1,28 +1,33 @@
-import React from 'react'
+import React, { Component, PropTypes } from 'react'
 
-class Controller extends React.Component {
-  _onClickStart() {
+class Controller extends Component {
+  static propTypes = {
+    actions: PropTypes.object.isRequired
+  }
+
+  handleClickStart() {
 
   }
 
-  _onClickStop() {
+  handleClickStop() {
 
   }
 
-  _onClickClear() {
-
+  handleClickClear() {
+    this.props.actions.clearAll()
   }
 
-  _onClickRandom() {
-
+  handleClickRandom() {
+    this.props.actions.randomAll()
   }
+
   render() {
     return (
       <div>
-        <button onClick={this._onClickStart}>start</button>
-        <button onClick={this._onClickStop}>stop</button>
-        <button onClick={this._onClickClear}>clear</button>
-        <button onClick={this._onClickRandom}>random</button>
+        <button onClick={() => this.handleClickStart()}>start</button>
+        <button onClick={() => this.handleClickStop()}>stop</button>
+        <button onClick={() => this.handleClickClear()}>clear</button>
+        <button onClick={() => this.handleClickRandom()}>random</button>
       </div>
     )
   }

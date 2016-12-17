@@ -4,11 +4,11 @@ import { connect } from 'react-redux'
 
 import Board from '../components/board.jsx'
 import Controller from '../components/controller.jsx'
-import * as ConwayActions from '../actions'
+import * as Actions from '../actions'
 
 const App = ({cells, actions}) => (
   <div>
-    <Controller />
+    <Controller actions={actions} />
     <Board cells={cells} actions={actions} />
   </div>
 )
@@ -18,12 +18,8 @@ App.propTypes = {
   actions: PropTypes.object.isRequired
 }
 
-const mapStateToProps = state => ({
-  cells: state.cells
-})
-
-const mapDispatchToProps = dispatch => ({
-  actions: bindActionCreators(ConwayActions, dispatch)
+const mapStateToProps = state => ({ cells: state.cells })
+const mapDispatchToProps = dispatch => ({ actions: bindActionCreators(Actions, dispatch)
 })
 
 export default connect(

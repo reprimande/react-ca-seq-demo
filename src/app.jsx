@@ -1,26 +1,17 @@
 import _ from 'lodash'
 import React from 'react'
 import { render } from 'react-dom'
-import { createStore } from 'redux'
-import { Provider } from 'react-redux'
+import { createStore, bindActionCreators } from 'redux'
+import { Provider, connect } from 'react-redux'
 
 import App from './containers/App.jsx'
 import cells from './reducers'
+import * as Actions from './actions'
+
 import Sequencer from './sequencer'
 
-/* import Kick from './synth/kick'
-   import Snare from './synth/snare'
-   import Hihat from './synth/hihat'
-   import Acid from './synth/acid' */
-
-const store = createStore(cells)
-
-const s = new Sequencer(16)
-s.on('step', (step) => {
-  store.dispatch({
-    type: 'PROCESS'
-  })
-})
+const store = createStore(cells),
+      sequencer = new Sequencer(new AudioContext(), store, 16)
 
 render(
   <Provider store={store}>
@@ -29,4 +20,4 @@ render(
   document.getElementById('c')
 )
 
-s.start()
+sequencer.start()
