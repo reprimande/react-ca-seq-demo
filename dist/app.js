@@ -40961,47 +40961,55 @@ var Sequencer = function () {
     this.drumkit = new _drumkit2.default(ctx);
     this.bass = new _acid2.default(ctx);
     this.sched = new _webAudioScheduler2.default({ context: ctx, timerAPI: _workerTimer2.default });
-    this.process = this.process.bind(this);
+    this.tick = this.tick.bind(this);
 
     var baseNote = 60;
     this.tracks = [{ s: this.bass, args: [12 + baseNote] }, { s: this.bass, args: [11 + baseNote] }, { s: this.bass, args: [9 + baseNote] }, { s: this.bass, args: [7 + baseNote] }, { s: this.bass, args: [5 + baseNote] }, { s: this.bass, args: [4 + baseNote] }, { s: this.bass, args: [2 + baseNote] }, { s: this.bass, args: [0 + baseNote] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }];
 
     this.actions = (0, _redux.bindActionCreators)(Actions, store.dispatch);
     store.subscribe(function () {
-      _this.state = store.getState();
-      if (_this.state.sequencer.running) {
+      var state = store.getState();
+      _this.cells = state.cells;
+      _this.bpm = state.sequencer.bpm;
+      if (state.sequencer.running) {
         _this.start();
       } else {
         _this.stop();
       }
-      _this.bpm = _this.state.sequencer.bpm;
-      if (_this.step != _this.state.sequencer.step) {
-        var currents = _lodash2.default.flatten(_this.state.cells.map(function (row) {
-          return row.filter(function (_, x) {
-            return x === _this.step;
-          });
-        }));
-        currents.map(function (v, i) {
-          var track = _this.tracks[i];
-          track.active = v === 1 ? true : false;
-          return track;
-        }).filter(function (t) {
-          return t.active;
-        }).forEach(function (t) {
-          var _t$s;
-
-          (_t$s = t.s).play.apply(_t$s, _toConsumableArray(t.args));
-        });
-        _this.step = _this.state.sequencer.step;
+      if (_this.step != state.sequencer.step) {
+        _this.playTracks();
+        _this.step = state.sequencer.step;
       }
     });
   }
 
   _createClass(Sequencer, [{
+    key: 'playTracks',
+    value: function playTracks() {
+      var _this2 = this;
+
+      var currents = _lodash2.default.flatten(this.cells.map(function (row) {
+        return row.filter(function (_, x) {
+          return x === _this2.step;
+        });
+      }));
+      currents.map(function (v, i) {
+        var track = _this2.tracks[i];
+        track.active = v === 1 ? true : false;
+        return track;
+      }).filter(function (t) {
+        return t.active;
+      }).forEach(function (t) {
+        var _t$s;
+
+        (_t$s = t.s).play.apply(_t$s, _toConsumableArray(t.args));
+      });
+    }
+  }, {
     key: 'start',
     value: function start() {
       if (this.sched.state === 'suspended') {
-        this.sched.start(this.process);
+        this.sched.start(this.tick);
       }
     }
   }, {
@@ -41012,13 +41020,12 @@ var Sequencer = function () {
       }
     }
   }, {
-    key: 'process',
-    value: function process(e) {
-      var t = e.playbackTime;
-
+    key: 'tick',
+    value: function tick(e) {
+      var t = e.playbackTime,
+          bpm = this.bpm;
       this.actions.step();
-
-      this.sched.insert(t + 1 / this.bpm * 16, this.process);
+      this.sched.insert(t + 1 / bpm * 16, this.tick);
     }
   }]);
 
