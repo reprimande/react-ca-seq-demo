@@ -40093,6 +40093,77 @@ function defaults(value, defaultValue) {
 
 module.exports = defaults;
 },{}],222:[function(require,module,exports){
+(function (global){
+"use strict";
+
+if (global === global.window && global.URL && global.Blob && global.Worker) {
+  module.exports = (function() {
+    var TIMER_WORKER_SOURCE = [
+      "var timerIds = {}, _ = {};",
+      "_.setInterval = function(args) {",
+      "  timerIds[args.timerId] = setInterval(function() { postMessage(args.timerId); }, args.delay);",
+      "};",
+      "_.clearInterval = function(args) {",
+      "  clearInterval(timerIds[args.timerId]);",
+      "};",
+      "_.setTimeout = function(args) {",
+      "  timerIds[args.timerId] = setTimeout(function() { postMessage(args.timerId); }, args.delay);",
+      "};",
+      "_.clearTimeout = function(args) {",
+      "  clearTimeout(timerIds[args.timerId]);",
+      "};",
+      "onmessage = function(e) { _[e.data.type](e.data) };"
+    ].join("");
+
+    var _timerId = 0;
+    var _callbacks = {};
+    var _timer = new global.Worker(global.URL.createObjectURL(
+      new global.Blob([ TIMER_WORKER_SOURCE ], { type: "text/javascript" })
+    ));
+
+    _timer.onmessage = function(e) {
+      if (_callbacks[e.data]) {
+        _callbacks[e.data].callback.apply(null, _callbacks[e.data].params);
+      }
+    };
+
+    return {
+      setInterval: function(callback, delay) {
+        var params = Array.prototype.slice.call(arguments, 2);
+
+        _timerId += 1;
+
+        _timer.postMessage({ type: "setInterval", timerId: _timerId, delay: delay });
+        _callbacks[_timerId] = { callback: callback, params: params };
+
+        return _timerId;
+      },
+      setTimeout: function(callback, delay) {
+        var params = Array.prototype.slice.call(arguments, 2);
+
+        _timerId += 1;
+
+        _timer.postMessage({ type: "setTimeout", timerId: _timerId, delay: delay });
+        _callbacks[_timerId] = { callback: callback, params: params };
+
+        return _timerId;
+      },
+      clearInterval: function(timerId) {
+        _timer.postMessage({ type: "clearInterval", timerId: timerId });
+        _callbacks[timerId] = null;
+      },
+      clearTimeout: function(timerId) {
+        _timer.postMessage({ type: "clearTimeout", timerId: timerId });
+        _callbacks[timerId] = null;
+      }
+    };
+  })();
+} else {
+  module.exports = global;
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],223:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40132,7 +40203,7 @@ var bpm = exports.bpm = function bpm(_bpm) {
   return { type: types.BPM, bpm: _bpm };
 };
 
-},{"../constants/ActionTypes":228}],223:[function(require,module,exports){
+},{"../constants/ActionTypes":229}],224:[function(require,module,exports){
 'use strict';
 
 var _lodash = require('lodash');
@@ -40180,7 +40251,7 @@ var store = (0, _redux.createStore)(_reducers2.default),
   _react2.default.createElement(_App2.default, null)
 ), document.getElementById('c'));
 
-},{"./actions":222,"./containers/App.jsx":229,"./reducers":231,"./sequencer":233,"lodash":37,"react":206,"react-dom":40,"react-redux":176,"redux":212}],224:[function(require,module,exports){
+},{"./actions":223,"./containers/App.jsx":230,"./reducers":232,"./sequencer":234,"lodash":37,"react":206,"react-dom":40,"react-redux":176,"redux":212}],225:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40267,7 +40338,7 @@ Board.propTypes = {
 };
 exports.default = Board;
 
-},{"./row.jsx":227,"react":206}],225:[function(require,module,exports){
+},{"./row.jsx":228,"react":206}],226:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40359,7 +40430,7 @@ Cell.propTypes = {
 };
 exports.default = Cell;
 
-},{"react":206}],226:[function(require,module,exports){
+},{"react":206}],227:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40489,7 +40560,7 @@ Controller.propTypes = {
 };
 exports.default = Controller;
 
-},{"react":206}],227:[function(require,module,exports){
+},{"react":206}],228:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40582,7 +40653,7 @@ Row.propTypes = {
 };
 exports.default = Row;
 
-},{"./cell.jsx":225,"react":206}],228:[function(require,module,exports){
+},{"./cell.jsx":226,"react":206}],229:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40599,7 +40670,7 @@ var STOP = exports.STOP = 'STOP';
 var START = exports.START = 'START';
 var BPM = exports.BPM = 'BPM';
 
-},{}],229:[function(require,module,exports){
+},{}],230:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40672,7 +40743,7 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(App);
 
-},{"../actions":222,"../components/board.jsx":224,"../components/controller.jsx":226,"react":206,"react-redux":176,"redux":212}],230:[function(require,module,exports){
+},{"../actions":223,"../components/board.jsx":225,"../components/controller.jsx":227,"react":206,"react-redux":176,"redux":212}],231:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40778,7 +40849,7 @@ var clearAll = function clearAll(cells) {
 
 exports.default = cells;
 
-},{"../constants/ActionTypes":228,"lodash":37}],231:[function(require,module,exports){
+},{"../constants/ActionTypes":229,"lodash":37}],232:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40799,7 +40870,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = (0, _redux.combineReducers)({ cells: _cells2.default, sequencer: _sequencer2.default });
 
-},{"./cells":230,"./sequencer":232,"redux":212}],232:[function(require,module,exports){
+},{"./cells":231,"./sequencer":233,"redux":212}],233:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40828,7 +40899,7 @@ var sequencer = function sequencer() {
 
 exports.default = sequencer;
 
-},{"../constants/ActionTypes":228}],233:[function(require,module,exports){
+},{"../constants/ActionTypes":229}],234:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40846,6 +40917,10 @@ var _lodash2 = _interopRequireDefault(_lodash);
 var _webAudioScheduler = require('web-audio-scheduler');
 
 var _webAudioScheduler2 = _interopRequireDefault(_webAudioScheduler);
+
+var _workerTimer = require('worker-timer');
+
+var _workerTimer2 = _interopRequireDefault(_workerTimer);
 
 var _actions = require('./actions');
 
@@ -40879,7 +40954,7 @@ var Sequencer = function () {
     this.ctx = ctx;
     this.drumkit = new _drumkit2.default(ctx);
     this.bass = new _acid2.default(ctx);
-    this.sched = new _webAudioScheduler2.default({ context: ctx });
+    this.sched = new _webAudioScheduler2.default({ context: ctx, timerAPI: _workerTimer2.default });
     this.process = this.process.bind(this);
 
     this.actions = (0, _redux.bindActionCreators)(Actions, store.dispatch);
@@ -40948,7 +41023,7 @@ var Sequencer = function () {
 
 exports.default = Sequencer;
 
-},{"./actions":222,"./synth/acid":234,"./synth/drumkit":235,"lodash":37,"redux":212,"web-audio-scheduler":217}],234:[function(require,module,exports){
+},{"./actions":223,"./synth/acid":235,"./synth/drumkit":236,"lodash":37,"redux":212,"web-audio-scheduler":217,"worker-timer":222}],235:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41008,7 +41083,7 @@ var Acid = function () {
 
 exports.default = Acid;
 
-},{"./util":239}],235:[function(require,module,exports){
+},{"./util":240}],236:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41042,7 +41117,7 @@ var DrumKit = function DrumKit(ctx) {
 
 exports.default = DrumKit;
 
-},{"./hihat":236,"./kick":237,"./snare":238}],236:[function(require,module,exports){
+},{"./hihat":237,"./kick":238,"./snare":239}],237:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41098,7 +41173,7 @@ var Hihat = function () {
 
 exports.default = Hihat;
 
-},{"./util":239}],237:[function(require,module,exports){
+},{"./util":240}],238:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41148,7 +41223,7 @@ var Kick = function () {
 
 exports.default = Kick;
 
-},{}],238:[function(require,module,exports){
+},{}],239:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41205,7 +41280,7 @@ var Snare = function () {
 
 exports.default = Snare;
 
-},{"./util":239}],239:[function(require,module,exports){
+},{"./util":240}],240:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -41225,4 +41300,4 @@ var m2f = exports.m2f = function m2f(note) {
   return 440.0 * Math.pow(2.0, (note - 69) / 12);
 };
 
-},{}]},{},[223]);
+},{}]},{},[224]);

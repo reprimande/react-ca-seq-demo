@@ -20,7 +20,8 @@
     "react-redux": "^5.0.1",
     "redux": "^3.6.0",
     "sleep-async": "^1.0.1",
-    "web-audio-scheduler": "^1.3.0"
+    "web-audio-scheduler": "^1.3.0",
+    "worker-timer": "^1.1.0"
   },
   "devDependencies": {
     "babel-plugin-transform-react-jsx": "^6.8.0",

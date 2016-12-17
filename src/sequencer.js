@@ -1,6 +1,7 @@
 import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import WebAudioScheduler from 'web-audio-scheduler'
+import WorkerTimer from 'worker-timer'
 
 import * as Actions from './actions'
 
@@ -15,7 +16,7 @@ class Sequencer {
     this.ctx = ctx
     this.drumkit = new DrumKit(ctx)
     this.bass = new Acid(ctx)
-    this.sched = new WebAudioScheduler({ context: ctx });
+    this.sched = new WebAudioScheduler({ context: ctx, timerAPI: WorkerTimer });
     this.process = this.process.bind(this)
 
     this.actions = bindActionCreators(Actions, store.dispatch)
