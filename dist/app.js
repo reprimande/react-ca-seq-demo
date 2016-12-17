@@ -40304,12 +40304,12 @@ var Cell = function (_Component) {
     value: function render() {
       var _this2 = this;
 
-      var colors = ['white', 'blue'],
+      var colors = ['white', 'orange'],
           cellSize = '24px',
           cellStyle = {
         backgroundColor: colors[this.props.cell],
         borderStyle: "none",
-        //borderWidth: "1px",
+        borderRadius: "5px",
         padding: "0px",
         margin: "0px",
         width: cellSize,
@@ -40908,7 +40908,8 @@ var Sequencer = function () {
       this.actions.step(this.step);
       // TODO timing
       // TODO management instruments
-      var tracks = [{ s: this.bass, args: [12 + 60] }, { s: this.bass, args: [11 + 60] }, { s: this.bass, args: [9 + 60] }, { s: this.bass, args: [7 + 60] }, { s: this.bass, args: [5 + 60] }, { s: this.bass, args: [4 + 60] }, { s: this.bass, args: [2 + 60] }, { s: this.bass, args: [0 + 60] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }];
+      var baseNote = 60;
+      var tracks = [{ s: this.bass, args: [12 + baseNote] }, { s: this.bass, args: [11 + baseNote] }, { s: this.bass, args: [9 + baseNote] }, { s: this.bass, args: [7 + baseNote] }, { s: this.bass, args: [5 + baseNote] }, { s: this.bass, args: [4 + baseNote] }, { s: this.bass, args: [2 + baseNote] }, { s: this.bass, args: [0 + baseNote] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }];
 
       var currents = _lodash2.default.flatten(this.state.cells.map(function (row) {
         return row.filter(function (_, x) {
@@ -40945,58 +40946,49 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _util = require('./util');
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Acid = function () {
   function Acid(ctx) {
     _classCallCheck(this, Acid);
 
-    var t = ctx.currentTime;
+    this.ctx = ctx;
+    this.decay = 0.3;
+    this.filter = this.ctx.createBiquadFilter();
+    this.filter.type = 'lowpass';
+    this.filter.frequency.value = 2000;
+    this.filter.Q.value = 10;
 
-    this._ctx = ctx;
-    this._decay = 0.5;
-    this._filter = this._ctx.createBiquadFilter();
-    this._filter.type = 'lowpass';
-    this._filter.frequency.value = 2000;
-    this._filter.Q.value = 10;
-
-    this._gain = this._ctx.createGain();
-    this._gain.gain.value = 0;
-    this._filter.connect(this._gain);
-    this._gain.connect(this._ctx.destination);
+    this.gain = this.ctx.createGain();
+    this.gain.gain.value = 0;
+    this.filter.connect(this.gain);
+    this.gain.connect(this.ctx.destination);
   }
 
   _createClass(Acid, [{
-    key: 'm2f',
-    value: function m2f(note) {
-      return 440.0 * Math.pow(2.0, (note - 69.0) / 12.0);
-    }
-  }, {
     key: 'play',
     value: function play() {
       var note = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 24;
 
-      var t = this._ctx.currentTime;
+      var t = this.ctx.currentTime,
+          osc = this.ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.connect(this.filter);
+      osc.frequency.setValueAtTime((0, _util.m2f)(note), t);
+      osc.start(t);
+      osc.stop(t + this.decay);
 
-      this._osc = this._ctx.createOscillator();
-      this._osc.type = 'sawtooth';
+      this.filter.frequency.cancelScheduledValues(0);
+      this.filter.frequency.setValueAtTime(0, t);
+      this.filter.frequency.linearRampToValueAtTime(4000, t);
+      this.filter.frequency.exponentialRampToValueAtTime(1000, t + this.decay / 2);
 
-      this._osc.connect(this._filter);
-
-      this._osc.frequency.setValueAtTime(this.m2f(note), t);
-
-      this._filter.frequency.cancelScheduledValues(0);
-      this._filter.frequency.setValueAtTime(0, t);
-      this._filter.frequency.linearRampToValueAtTime(4000, t);
-      this._filter.frequency.exponentialRampToValueAtTime(1000, t + this._decay / 2);
-
-      this._gain.gain.cancelScheduledValues(0);
-      this._gain.gain.setValueAtTime(0, t);
-      this._gain.gain.linearRampToValueAtTime(0.2, t);
-      this._gain.gain.exponentialRampToValueAtTime(0.0001, t + this._decay);
-
-      this._osc.start(t);
-      this._osc.stop(t + this._decay);
+      this.gain.gain.cancelScheduledValues(0);
+      this.gain.gain.setValueAtTime(0, t);
+      this.gain.gain.linearRampToValueAtTime(0.1, t);
+      this.gain.gain.exponentialRampToValueAtTime(0.0001, t + this.decay);
     }
   }]);
 
@@ -41005,14 +40997,12 @@ var Acid = function () {
 
 exports.default = Acid;
 
-},{}],235:[function(require,module,exports){
+},{"./util":239}],235:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _kick = require('./kick');
 
@@ -41030,40 +41020,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var DrumKit = function () {
-  function DrumKit(ctx) {
-    _classCallCheck(this, DrumKit);
+var DrumKit = function DrumKit(ctx) {
+  _classCallCheck(this, DrumKit);
 
-    this._kick = new _kick2.default(ctx);
-    this._snare = new _snare2.default(ctx);
-    this._ch = new _hihat2.default(ctx);
-    this._oh = new _hihat2.default(ctx, 0.3);
-  }
-
-  _createClass(DrumKit, [{
-    key: 'kick',
-    get: function get() {
-      return this._kick;
-    }
-  }, {
-    key: 'snare',
-    get: function get() {
-      return this._snare;
-    }
-  }, {
-    key: 'ch',
-    get: function get() {
-      return this._ch;
-    }
-  }, {
-    key: 'oh',
-    get: function get() {
-      return this._oh;
-    }
-  }]);
-
-  return DrumKit;
-}();
+  this.kick = new _kick2.default(ctx);
+  this.snare = new _snare2.default(ctx);
+  this.ch = new _hihat2.default(ctx);
+  this.oh = new _hihat2.default(ctx, 0.4);
+};
 
 exports.default = DrumKit;
 
@@ -41076,6 +41040,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _util = require('./util');
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Hihat = function () {
@@ -41084,45 +41050,35 @@ var Hihat = function () {
 
     _classCallCheck(this, Hihat);
 
-    var t = ctx.currentTime;
-    this._ctx = ctx;
+    this.ctx = ctx;
     this.decay = decay;
+
+    this.filter = this.ctx.createBiquadFilter();
+    this.filter.type = 'bandpass';
+    this.filter.frequency.value = 10000;
+    this.filter.Q.value = 2;
+    this.gain = this.ctx.createGain();
+    this.gain.gain.value = 0;
+    this.filter.connect(this.gain);
+    this.gain.connect(this.ctx.destination);
+
+    this.noiseBuffer = (0, _util.createNoiseBuffer)(ctx);
   }
 
   _createClass(Hihat, [{
     key: 'play',
     value: function play() {
-      this._noise = this._ctx.createBufferSource();
-      this._noise.buffer = function (ctx) {
-        var size = ctx.sampleRate,
-            buf = ctx.createBuffer(1, size, ctx.sampleRate),
-            output = buf.getChannelData(0);
-        for (var i = 0; i < size; i++) {
-          output[i] = Math.random() * 2 - 1;
-        }
-        return buf;
-      }(this._ctx);
-      this._filter = this._ctx.createBiquadFilter();
-      this._filter.type = 'bandpass';
-      this._filter.frequency.value = 10000;
-      this._filter.Q.value = 10;
-      this._noise.connect(this._filter);
-      this._gain = this._ctx.createGain();
-      this._gain.gain.value = 0;
-      this._filter.connect(this._gain);
+      var t = this.ctx.currentTime,
+          noise = this.ctx.createBufferSource();
+      noise.buffer = this.noiseBuffer;
+      noise.connect(this.filter);
+      noise.start(t);
+      noise.stop(t + this.decay);
 
-      this._gain.connect(this._ctx.destination);
-
-      var t = this._ctx.currentTime;
-
-      this._noise.start(t);
-
-      this._gain.gain.cancelScheduledValues(0);
-      this._gain.gain.setValueAtTime(0, t);
-      this._gain.gain.linearRampToValueAtTime(1, t);
-      this._gain.gain.exponentialRampToValueAtTime(0.001, t + this.decay);
-
-      this._noise.stop(t + this.decay);
+      this.gain.gain.cancelScheduledValues(0);
+      this.gain.gain.setValueAtTime(0, t);
+      this.gain.gain.linearRampToValueAtTime(0.5, t);
+      this.gain.gain.exponentialRampToValueAtTime(0.001, t + this.decay);
     }
   }]);
 
@@ -41131,7 +41087,7 @@ var Hihat = function () {
 
 exports.default = Hihat;
 
-},{}],237:[function(require,module,exports){
+},{"./util":239}],237:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -41147,35 +41103,32 @@ var Kick = function () {
     _classCallCheck(this, Kick);
 
     var t = ctx.currentTime;
-
-    this._ctx = ctx;
-    this._decay = 0.2;
-    this._hi = 220;
-    this._lo = 20;
-
-    this._gain = this._ctx.createGain();
-
-    this._gain.gain.value = 0; //setValueAtTime(0, t)
-
-    this._gain.connect(this._ctx.destination);
+    this.ctx = ctx;
+    this.decay = 0.2;
+    this.hi = 200;
+    this.lo = 40;
+    this.gain = this.ctx.createGain();
+    this.gain.gain.value = 0;
+    this.gain.connect(this.ctx.destination);
   }
 
   _createClass(Kick, [{
     key: 'play',
     value: function play() {
-      var t = this._ctx.currentTime;
-      this._osc = this._ctx.createOscillator();
-      this._osc.type = 'triangle';
+      var t = this.ctx.currentTime,
+          osc = this.ctx.createOscillator();
+      osc.type = 'sine';
+      osc.start(t);
+      osc.stop(t + this.decay);
+      osc.connect(this.gain);
 
-      this._osc.connect(this._gain);
-      this._osc.frequency.setValueAtTime(this._hi, t);
-      this._osc.frequency.exponentialRampToValueAtTime(this._lo, t + this._decay);
-      this._gain.gain.cancelScheduledValues(0);
-      this._gain.gain.setValueAtTime(0, t);
-      this._gain.gain.linearRampToValueAtTime(1, t);
-      this._gain.gain.exponentialRampToValueAtTime(0.0001, t + this._decay);
-      this._osc.start(t);
-      this._osc.stop(t + this._decay);
+      osc.frequency.setValueAtTime(this.hi, t);
+      osc.frequency.exponentialRampToValueAtTime(this.lo, t + this.decay * 0.4);
+
+      this.gain.gain.cancelScheduledValues(0);
+      this.gain.gain.setValueAtTime(0, t);
+      this.gain.gain.linearRampToValueAtTime(0.5, t);
+      this.gain.gain.exponentialRampToValueAtTime(0.0001, t + this.decay);
     }
   }]);
 
@@ -41193,70 +41146,46 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _util = require('./util');
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Snare = function () {
   function Snare(ctx) {
     _classCallCheck(this, Snare);
 
-    var t = ctx.currentTime;
+    this.ctx = ctx;
+    this.decay = 0.4;
 
-    this._ctx = ctx;
-    this._decay = 0.4;
+    this.filter = this.ctx.createBiquadFilter();
+    this.filter.type = 'bandpass';
+    this.filter.frequency.value = 1200;
+    this.filter.Q.value = 2;
+
+    this.gain = this.ctx.createGain();
+    this.gain.gain.value = 0;
+
+    this.filter.connect(this.gain);
+    this.gain.connect(this.ctx.destination);
+
+    this.noiseBuffer = (0, _util.createNoiseBuffer)(ctx);
   }
 
   _createClass(Snare, [{
     key: 'play',
     value: function play() {
-      this._noise = this._ctx.createBufferSource();
-      this._noise.buffer = function (ctx) {
-        var size = ctx.sampleRate,
-            buf = ctx.createBuffer(1, size, ctx.sampleRate),
-            output = buf.getChannelData(0);
-        for (var i = 0; i < size; i++) {
-          output[i] = Math.random() * 2 - 1;
-        }
-        return buf;
-      }(this._ctx);
-      this._filter = this._ctx.createBiquadFilter();
-      this._filter.type = 'bandpass';
-      this._filter.frequency.value = 1200;
-      this._filter.Q.value = 2;
+      var t = this.ctx.currentTime,
+          noise = this.ctx.createBufferSource();
+      noise.buffer = this.noiseBuffer;
 
-      this._noise.connect(this._filter);
-      this._gain = this._ctx.createGain();
-      this._gain.gain.value = 0;
-      this._filter.connect(this._gain);
+      noise.connect(this.filter);
+      noise.start(t);
+      noise.stop(t + this.decay);
 
-      this._osc = this._ctx.createOscillator();
-      this._osc.type = 'triangle';
-      this._oscGain = this._ctx.createGain();
-      this._oscGain.gain.value = 0;
-      //this._osc.connect(this._oscGain)
-
-      this._gain.connect(this._ctx.destination);
-      this._oscGain.connect(this._ctx.destination);
-
-      var t = this._ctx.currentTime;
-      //this._osc.frequency.setValueAtTime(this._hi, t)
-      //this._osc.frequency.exponentialRampToValueAtTime(this._lo, t + this._decay)
-
-      this._osc.frequency.setValueAtTime(100, t);
-      this._noise.start(t);
-      this._osc.start(t);
-
-      this._gain.gain.cancelScheduledValues(0);
-      this._gain.gain.setValueAtTime(0, t);
-      this._gain.gain.linearRampToValueAtTime(1, t);
-      this._gain.gain.exponentialRampToValueAtTime(0.0001, t + this._decay);
-
-      this._oscGain.gain.cancelScheduledValues(0);
-      this._oscGain.gain.setValueAtTime(0, t);
-      this._oscGain.gain.linearRampToValueAtTime(1, t);
-      this._oscGain.gain.exponentialRampToValueAtTime(1, t + this._decay);
-
-      this._noise.stop(t + this._decay);
-      this._osc.stop(t + this._decay);
+      this.gain.gain.cancelScheduledValues(0);
+      this.gain.gain.setValueAtTime(0, t);
+      this.gain.gain.linearRampToValueAtTime(0.5, t);
+      this.gain.gain.exponentialRampToValueAtTime(0.0001, t + this.decay);
     }
   }]);
 
@@ -41264,5 +41193,25 @@ var Snare = function () {
 }();
 
 exports.default = Snare;
+
+},{"./util":239}],239:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var createNoiseBuffer = exports.createNoiseBuffer = function createNoiseBuffer(ctx) {
+  var size = ctx.sampleRate,
+      buf = ctx.createBuffer(1, size, ctx.sampleRate),
+      output = buf.getChannelData(0);
+  for (var i = 0; i < size; i++) {
+    output[i] = Math.random() * 2 - 1;
+  }
+  return buf;
+};
+
+var m2f = exports.m2f = function m2f(note) {
+  return 440.0 * Math.pow(2.0, (note - 69) / 12);
+};
 
 },{}]},{},[223]);

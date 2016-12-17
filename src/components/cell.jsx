@@ -14,12 +14,12 @@ class Cell extends Component {
   }
 
   render() {
-    const colors = ['white', 'blue'],
+    const colors = ['white', 'orange'],
           cellSize = '24px',
           cellStyle = {
             backgroundColor: colors[this.props.cell],
             borderStyle: "none",
-            //borderWidth: "1px",
+            borderRadius: "5px",
             padding: "0px",
             margin: "0px",
             width: cellSize,

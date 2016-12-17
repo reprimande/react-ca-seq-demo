@@ -1,42 +1,29 @@
 export default class Kick {
   constructor(ctx) {
     const t = ctx.currentTime
-
-    this._ctx = ctx
-    this._decay = 0.2
-    this._hi = 220
-    this._lo = 20
-
-    this._gain = this._ctx.createGain()
-
-    this._gain.gain.value = 0 //setValueAtTime(0, t)
-
-    this._gain.connect(this._ctx.destination)
-
+    this.ctx = ctx
+    this.decay = 0.2
+    this.hi = 200
+    this.lo = 40
+    this.gain = this.ctx.createGain()
+    this.gain.gain.value = 0
+    this.gain.connect(this.ctx.destination)
   }
 
   play() {
-    const t = this._ctx.currentTime
-    this._osc = this._ctx.createOscillator()
-    this._osc.type = 'triangle'
+    const t = this.ctx.currentTime,
+          osc = this.ctx.createOscillator()
+    osc.type = 'sine'
+    osc.start(t)
+    osc.stop(t + this.decay)
+    osc.connect(this.gain)
 
-    this._osc.connect(this._gain)
-    this._osc.frequency.setValueAtTime(this._hi, t)
-    this._osc.frequency.exponentialRampToValueAtTime(this._lo, t + this._decay)
-    this._gain.gain.cancelScheduledValues(0)
-    this._gain.gain.setValueAtTime(0, t)
-    this._gain.gain.linearRampToValueAtTime(1, t)
-    this._gain.gain.exponentialRampToValueAtTime(0.0001, t + this._decay)
-    this._osc.start(t)
-    this._osc.stop(t + this._decay)
+    osc.frequency.setValueAtTime(this.hi, t)
+    osc.frequency.exponentialRampToValueAtTime(this.lo, t + this.decay * 0.4)
+
+    this.gain.gain.cancelScheduledValues(0)
+    this.gain.gain.setValueAtTime(0, t)
+    this.gain.gain.linearRampToValueAtTime(0.5, t)
+    this.gain.gain.exponentialRampToValueAtTime(0.0001, t + this.decay)
   }
 }
-
-
-
-
-
-
-
-
-

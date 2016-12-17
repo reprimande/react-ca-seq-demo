@@ -54,15 +54,16 @@ class Sequencer {
     this.actions.step(this.step)
     // TODO timing
     // TODO management instruments
+    const baseNote = 60
     const tracks = [
-      { s: this.bass, args: [12 + 60] },
-      { s: this.bass, args: [11 + 60] },
-      { s: this.bass, args: [9 + 60] },
-      { s: this.bass, args: [7 + 60] },
-      { s: this.bass, args: [5 + 60] },
-      { s: this.bass, args: [4 + 60] },
-      { s: this.bass, args: [2 + 60] },
-      { s: this.bass, args: [0 + 60] },
+      { s: this.bass, args: [12 + baseNote] },
+      { s: this.bass, args: [11 + baseNote] },
+      { s: this.bass, args: [9 + baseNote] },
+      { s: this.bass, args: [7 + baseNote] },
+      { s: this.bass, args: [5 + baseNote] },
+      { s: this.bass, args: [4 + baseNote] },
+      { s: this.bass, args: [2 + baseNote] },
+      { s: this.bass, args: [0 + baseNote] },
       { s: this.drumkit.oh, args: [] },
       { s: this.drumkit.oh, args: [] },
       { s: this.drumkit.ch, args: [] },
