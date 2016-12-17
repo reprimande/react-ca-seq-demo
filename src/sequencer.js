@@ -20,7 +20,6 @@ class Sequencer {
     this.bass = new Acid(ctx)
 
     this.sched = new WebAudioScheduler({ context: ctx });
-
     this.process = this.process.bind(this)
 
     store.subscribe(() => {
@@ -52,7 +51,6 @@ class Sequencer {
     this.step = (this.step + 1) % this.length
     this.actions.process()
     this.actions.step(this.step)
-    // TODO timing
     // TODO management instruments
     const baseNote = 60
     const tracks = [
@@ -92,10 +90,3 @@ class Sequencer {
 }
 
 export default Sequencer
-
-
-
-
-
-
-

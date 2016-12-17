@@ -40889,7 +40889,6 @@ var Sequencer = function () {
     this.bass = new _acid2.default(ctx);
 
     this.sched = new _webAudioScheduler2.default({ context: ctx });
-
     this.process = this.process.bind(this);
 
     store.subscribe(function () {
@@ -40927,7 +40926,6 @@ var Sequencer = function () {
       this.step = (this.step + 1) % this.length;
       this.actions.process();
       this.actions.step(this.step);
-      // TODO timing
       // TODO management instruments
       var baseNote = 60;
       var tracks = [{ s: this.bass, args: [12 + baseNote] }, { s: this.bass, args: [11 + baseNote] }, { s: this.bass, args: [9 + baseNote] }, { s: this.bass, args: [7 + baseNote] }, { s: this.bass, args: [5 + baseNote] }, { s: this.bass, args: [4 + baseNote] }, { s: this.bass, args: [2 + baseNote] }, { s: this.bass, args: [0 + baseNote] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }];
