@@ -1,6 +1,6 @@
 import { STEP, STOP, START, BPM } from '../constants/ActionTypes'
 
-const sequencer = (state = { step: 0, running: false, bpm: 120, length: 16 }, action) => {
+const sequencer = (state = { step: 0, running: false, bpm: 160, length: 16 }, action) => {
   switch (action.type) {
     case STEP:
       return {
