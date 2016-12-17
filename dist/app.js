@@ -40180,8 +40180,6 @@ var store = (0, _redux.createStore)(_reducers2.default),
   _react2.default.createElement(_App2.default, null)
 ), document.getElementById('c'));
 
-sequencer.start();
-
 },{"./actions":222,"./containers/App.jsx":229,"./reducers":231,"./sequencer":233,"lodash":37,"react":206,"react-dom":40,"react-redux":176,"redux":212}],224:[function(require,module,exports){
 'use strict';
 
@@ -40811,7 +40809,7 @@ Object.defineProperty(exports, "__esModule", {
 var _ActionTypes = require('../constants/ActionTypes');
 
 var sequencer = function sequencer() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { step: 0, running: true, bpm: 120 };
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { step: 0, running: false, bpm: 120 };
   var action = arguments[1];
 
   switch (action.type) {
@@ -40849,10 +40847,6 @@ var _webAudioScheduler = require('web-audio-scheduler');
 
 var _webAudioScheduler2 = _interopRequireDefault(_webAudioScheduler);
 
-var _reducers = require('./reducers');
-
-var _reducers2 = _interopRequireDefault(_reducers);
-
 var _actions = require('./actions');
 
 var Actions = _interopRequireWildcard(_actions);
@@ -40881,16 +40875,14 @@ var Sequencer = function () {
 
     this.length = length;
     this.step = 0;
-    this.isActive = false;
 
     this.ctx = ctx;
-    this.actions = (0, _redux.bindActionCreators)(Actions, store.dispatch);
     this.drumkit = new _drumkit2.default(ctx);
     this.bass = new _acid2.default(ctx);
-
     this.sched = new _webAudioScheduler2.default({ context: ctx });
     this.process = this.process.bind(this);
 
+    this.actions = (0, _redux.bindActionCreators)(Actions, store.dispatch);
     store.subscribe(function () {
       _this.state = store.getState();
       if (_this.state.sequencer.running) {
@@ -40956,7 +40948,7 @@ var Sequencer = function () {
 
 exports.default = Sequencer;
 
-},{"./actions":222,"./reducers":231,"./synth/acid":234,"./synth/drumkit":235,"lodash":37,"redux":212,"web-audio-scheduler":217}],234:[function(require,module,exports){
+},{"./actions":222,"./synth/acid":234,"./synth/drumkit":235,"lodash":37,"redux":212,"web-audio-scheduler":217}],234:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

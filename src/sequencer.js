@@ -1,8 +1,7 @@
-import { createStore, bindActionCreators } from 'redux'
+import { bindActionCreators } from 'redux'
 import _ from 'lodash'
 import WebAudioScheduler from 'web-audio-scheduler'
 
-import cells from './reducers'
 import * as Actions from './actions'
 
 import DrumKit from './synth/drumkit'
@@ -12,16 +11,14 @@ class Sequencer {
   constructor(ctx, store, length) {
     this.length = length
     this.step = 0
-    this.isActive = false
 
     this.ctx = ctx
-    this.actions = bindActionCreators(Actions, store.dispatch)
     this.drumkit = new DrumKit(ctx)
     this.bass = new Acid(ctx)
-
     this.sched = new WebAudioScheduler({ context: ctx });
     this.process = this.process.bind(this)
 
+    this.actions = bindActionCreators(Actions, store.dispatch)
     store.subscribe(() => {
       this.state = store.getState()
       if (this.state.sequencer.running) {

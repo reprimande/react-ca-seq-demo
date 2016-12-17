@@ -21,5 +21,3 @@ render(
   </Provider>,
   document.getElementById('c')
 )
-
-sequencer.start()
