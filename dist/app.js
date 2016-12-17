@@ -40777,6 +40777,8 @@ var cells = function cells() {
   switch (action.type) {
     case _ActionTypes.PROCESS:
       return process(state);
+    case _ActionTypes.STEP:
+      return process(state);
     case _ActionTypes.UPDATE_CELL:
       return updateCell(state, action.x, action.y);
     case _ActionTypes.RANDOM_ALL:
@@ -40880,18 +40882,23 @@ Object.defineProperty(exports, "__esModule", {
 var _ActionTypes = require('../constants/ActionTypes');
 
 var sequencer = function sequencer() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { step: 0, running: false, bpm: 120 };
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { step: 0, running: false, bpm: 120, length: 16 };
   var action = arguments[1];
 
   switch (action.type) {
     case _ActionTypes.STEP:
-      return { step: action.step, running: state.running, bpm: state.bpm };
+      return {
+        step: (state.step + 1) % state.length,
+        running: state.running,
+        bpm: state.bpm,
+        length: state.length
+      };
     case _ActionTypes.STOP:
-      return { step: state.step, running: false, bpm: state.bpm };
+      return { step: state.step, running: false, bpm: state.bpm, length: state.length };
     case _ActionTypes.START:
-      return { step: state.step, running: true, bpm: state.bpm };
+      return { step: state.step, running: true, bpm: state.bpm, length: state.length };
     case _ActionTypes.BPM:
-      return { step: state.step, running: state.running, bpm: action.bpm };
+      return { step: state.step, running: state.running, bpm: action.bpm, length: state.length };
     default:
       return state;
   }
@@ -40949,13 +40956,15 @@ var Sequencer = function () {
     _classCallCheck(this, Sequencer);
 
     this.length = length;
-    this.step = 0;
 
     this.ctx = ctx;
     this.drumkit = new _drumkit2.default(ctx);
     this.bass = new _acid2.default(ctx);
     this.sched = new _webAudioScheduler2.default({ context: ctx, timerAPI: _workerTimer2.default });
     this.process = this.process.bind(this);
+
+    var baseNote = 60;
+    this.tracks = [{ s: this.bass, args: [12 + baseNote] }, { s: this.bass, args: [11 + baseNote] }, { s: this.bass, args: [9 + baseNote] }, { s: this.bass, args: [7 + baseNote] }, { s: this.bass, args: [5 + baseNote] }, { s: this.bass, args: [4 + baseNote] }, { s: this.bass, args: [2 + baseNote] }, { s: this.bass, args: [0 + baseNote] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }];
 
     this.actions = (0, _redux.bindActionCreators)(Actions, store.dispatch);
     store.subscribe(function () {
@@ -40966,6 +40975,25 @@ var Sequencer = function () {
         _this.stop();
       }
       _this.bpm = _this.state.sequencer.bpm;
+      if (_this.step != _this.state.sequencer.step) {
+        var currents = _lodash2.default.flatten(_this.state.cells.map(function (row) {
+          return row.filter(function (_, x) {
+            return x === _this.step;
+          });
+        }));
+        currents.map(function (v, i) {
+          var track = _this.tracks[i];
+          track.active = v === 1 ? true : false;
+          return track;
+        }).filter(function (t) {
+          return t.active;
+        }).forEach(function (t) {
+          var _t$s;
+
+          (_t$s = t.s).play.apply(_t$s, _toConsumableArray(t.args));
+        });
+        _this.step = _this.state.sequencer.step;
+      }
     });
   }
 
@@ -40986,33 +41014,9 @@ var Sequencer = function () {
   }, {
     key: 'process',
     value: function process(e) {
-      var _this2 = this;
-
       var t = e.playbackTime;
 
-      this.step = (this.step + 1) % this.length;
-      this.actions.process();
-      this.actions.step(this.step);
-      // TODO management instruments
-      var baseNote = 60;
-      var tracks = [{ s: this.bass, args: [12 + baseNote] }, { s: this.bass, args: [11 + baseNote] }, { s: this.bass, args: [9 + baseNote] }, { s: this.bass, args: [7 + baseNote] }, { s: this.bass, args: [5 + baseNote] }, { s: this.bass, args: [4 + baseNote] }, { s: this.bass, args: [2 + baseNote] }, { s: this.bass, args: [0 + baseNote] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }];
-
-      var currents = _lodash2.default.flatten(this.state.cells.map(function (row) {
-        return row.filter(function (_, x) {
-          return x === _this2.step;
-        });
-      }));
-      currents.map(function (v, i) {
-        var track = tracks[i];
-        track.active = v === 1 ? true : false;
-        return track;
-      }).filter(function (t) {
-        return t.active;
-      }).forEach(function (t) {
-        var _t$s;
-
-        (_t$s = t.s).play.apply(_t$s, _toConsumableArray(t.args));
-      });
+      this.actions.step();
 
       this.sched.insert(t + 1 / this.bpm * 16, this.process);
     }

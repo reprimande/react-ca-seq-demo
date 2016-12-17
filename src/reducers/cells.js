@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { PROCESS, UPDATE_CELL, RANDOM_ALL, CLEAR_ALL } from '../constants/ActionTypes'
+import { PROCESS, STEP, UPDATE_CELL, RANDOM_ALL, CLEAR_ALL } from '../constants/ActionTypes'
 
 const createRandomCells = (size) => {
   return _.times(size, () => {
@@ -15,6 +15,8 @@ const initialState = createRandomCells(16)
 const cells = (state = initialState, action) => {
   switch (action.type) {
     case PROCESS:
+      return process(state)
+    case STEP:
       return process(state)
     case UPDATE_CELL:
       return updateCell(state, action.x, action.y)
