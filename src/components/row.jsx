@@ -5,6 +5,7 @@ class Row extends Component {
   static propTypes = {
     row: PropTypes.array.isRequired,
     y:  PropTypes.number.isRequired,
+    stepX:  PropTypes.number,
     onCellClick: PropTypes.func
   }
 
@@ -14,7 +15,7 @@ class Row extends Component {
 
   render() {
     const cells = this.props.row.map((cell, i) => {
-      return <Cell cell={cell} x={i} y={this.props.y} onCellClick={(x, y) => this.handleCellClick(x, y)}/>
+      return <Cell cell={cell} x={i} y={this.props.y} stepX={this.props.stepX} onCellClick={(x, y) => this.handleCellClick(x, y)}/>
     })
     return (<tr>{cells}</tr>)
   }

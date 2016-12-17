@@ -39592,7 +39592,7 @@ function symbolObservablePonyfill(root) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.clearAll = exports.randomAll = exports.updateCell = exports.process = undefined;
+exports.step = exports.clearAll = exports.randomAll = exports.updateCell = exports.process = undefined;
 
 var _ActionTypes = require('../constants/ActionTypes');
 
@@ -39611,6 +39611,9 @@ var randomAll = exports.randomAll = function randomAll() {
 };
 var clearAll = exports.clearAll = function clearAll() {
   return { type: types.CLEAR_ALL };
+};
+var step = exports.step = function step(_step) {
+  return { type: types.STEP, step: _step };
 };
 
 },{"../constants/ActionTypes":222}],217:[function(require,module,exports){
@@ -39661,7 +39664,7 @@ var store = (0, _redux.createStore)(_reducers2.default),
 
 sequencer.start();
 
-},{"./actions":216,"./containers/App.jsx":223,"./reducers":224,"./sequencer":225,"lodash":36,"react":205,"react-dom":39,"react-redux":175,"redux":211}],218:[function(require,module,exports){
+},{"./actions":216,"./containers/App.jsx":223,"./reducers":225,"./sequencer":227,"lodash":36,"react":205,"react-dom":39,"react-redux":175,"redux":211}],218:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -39706,16 +39709,16 @@ var Board = function (_Component) {
       var _this2 = this;
 
       var style = {
-        backgroundColor: "orange",
+        backgroundColor: "#afeeee",
         borderStyle: "none",
-        //borderWidth: "1px",
+        borderWidth: "1px",
         width: "256px",
         height: "256px",
         padding: "0px",
         margin: "0px"
       };
       var rows = this.props.cells.map(function (row, i) {
-        return _react2.default.createElement(_row2.default, { row: row, y: i, onCellClick: function onCellClick(x, y) {
+        return _react2.default.createElement(_row2.default, { row: row, y: i, stepX: _this2.props.sequencer.step, onCellClick: function onCellClick(x, y) {
             return _this2.handleCellClick(x, y);
           } });
       });
@@ -39732,6 +39735,7 @@ var Board = function (_Component) {
 
 Board.propTypes = {
   cells: _react.PropTypes.array.isRequired,
+  sequencer: _react.PropTypes.object.isRequired,
   actions: _react.PropTypes.object.isRequired
 };
 exports.default = Board;
@@ -39782,21 +39786,25 @@ var Cell = function (_Component) {
         borderStyle: "none",
         //borderWidth: "1px",
         padding: "0px",
-        margin: "0px"
+        margin: "0px",
+        position: 'relative'
       };
       var focusStyle = {
+        position: 'absolute',
         backgroundColor: 'red',
         opacity: '0.3',
         borderStyle: "none",
         padding: "0px",
         margin: "0px",
         zIndex: '999',
+        top: '0px',
+        left: '0px',
         display: 'inline-block',
         width: '100%',
         height: '100%'
       };
       var focus = "";
-      if (this.props.focus) {
+      if (this.props.stepX === this.props.x) {
         focus = _react2.default.createElement('div', { style: focusStyle });
       }
       return _react2.default.createElement(
@@ -39816,6 +39824,7 @@ Cell.propTypes = {
   cell: _react.PropTypes.number.isRequired,
   x: _react.PropTypes.number.isRequired,
   y: _react.PropTypes.number.isRequired,
+  stepX: _react.PropTypes.number,
   onCellClick: _react.PropTypes.func
 };
 exports.default = Cell;
@@ -39959,7 +39968,7 @@ var Row = function (_Component) {
       var _this2 = this;
 
       var cells = this.props.row.map(function (cell, i) {
-        return _react2.default.createElement(_cell2.default, { cell: cell, x: i, y: _this2.props.y, onCellClick: function onCellClick(x, y) {
+        return _react2.default.createElement(_cell2.default, { cell: cell, x: i, y: _this2.props.y, stepX: _this2.props.stepX, onCellClick: function onCellClick(x, y) {
             return _this2.handleCellClick(x, y);
           } });
       });
@@ -39977,6 +39986,7 @@ var Row = function (_Component) {
 Row.propTypes = {
   row: _react.PropTypes.array.isRequired,
   y: _react.PropTypes.number.isRequired,
+  stepX: _react.PropTypes.number,
   onCellClick: _react.PropTypes.func
 };
 exports.default = Row;
@@ -39992,6 +40002,7 @@ var UPDATE_CELL = exports.UPDATE_CELL = 'UPDATE_CELL';
 var RANDOM_ALL = exports.RANDOM_ALL = 'RANDOM_ALL';
 var SET_ALL = exports.SET_ALL = 'SET_ALL';
 var CLEAR_ALL = exports.CLEAR_ALL = 'CLEAR_ALL';
+var STEP = exports.STEP = 'STEP';
 
 },{}],223:[function(require,module,exports){
 'use strict';
@@ -40026,12 +40037,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var App = function App(_ref) {
   var cells = _ref.cells,
+      sequencer = _ref.sequencer,
       actions = _ref.actions;
   return _react2.default.createElement(
     'div',
     null,
     _react2.default.createElement(_controller2.default, { actions: actions }),
-    _react2.default.createElement(_board2.default, { cells: cells, actions: actions })
+    _react2.default.createElement(_board2.default, { cells: cells, sequencer: sequencer, actions: actions })
   );
 };
 
@@ -40041,7 +40053,7 @@ App.propTypes = {
 };
 
 var mapStateToProps = function mapStateToProps(state) {
-  return { cells: state.cells };
+  return { cells: state.cells, sequencer: state.sequencer };
 };
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
   return { actions: (0, _redux.bindActionCreators)(Actions, dispatch)
@@ -40058,8 +40070,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _redux = require('redux');
 
 var _lodash = require('lodash');
 
@@ -40156,9 +40166,53 @@ var clearAll = function clearAll(cells) {
   });
 };
 
-exports.default = (0, _redux.combineReducers)({ cells: cells });
+exports.default = cells;
 
-},{"../constants/ActionTypes":222,"lodash":36,"redux":211}],225:[function(require,module,exports){
+},{"../constants/ActionTypes":222,"lodash":36}],225:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _redux = require('redux');
+
+var _cells = require('./cells');
+
+var _cells2 = _interopRequireDefault(_cells);
+
+var _sequencer = require('./sequencer');
+
+var _sequencer2 = _interopRequireDefault(_sequencer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = (0, _redux.combineReducers)({ cells: _cells2.default, sequencer: _sequencer2.default });
+
+},{"./cells":224,"./sequencer":226,"redux":211}],226:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _ActionTypes = require('../constants/ActionTypes');
+
+var sequencer = function sequencer() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { step: 0 };
+  var action = arguments[1];
+
+  switch (action.type) {
+    case _ActionTypes.STEP:
+      return { step: action.step };
+    default:
+      return state;
+  }
+};
+
+exports.default = sequencer;
+
+},{"../constants/ActionTypes":222}],227:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40246,6 +40300,7 @@ var Sequencer = function () {
 
       this.step = (this.step + 1) % this.length;
       this.actions.process();
+      this.actions.step(this.step);
       // TODO timing
       // TODO management instruments
       var tracks = [{ s: this.bass, args: [12 + 36] }, { s: this.bass, args: [11 + 36] }, { s: this.bass, args: [9 + 36] }, { s: this.bass, args: [7 + 36] }, { s: this.bass, args: [5 + 36] }, { s: this.bass, args: [4 + 36] }, { s: this.bass, args: [2 + 36] }, { s: this.bass, args: [0 + 36] }, { s: this.drumkit.hihat, args: [] }, { s: this.drumkit.hihat, args: [] }, { s: this.drumkit.hihat, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }];
@@ -40275,7 +40330,7 @@ var Sequencer = function () {
 
 exports.default = Sequencer;
 
-},{"./actions":216,"./reducers":224,"./synth/acid":226,"./synth/drumkit":227,"lodash":36,"redux":211}],226:[function(require,module,exports){
+},{"./actions":216,"./reducers":225,"./synth/acid":228,"./synth/drumkit":229,"lodash":36,"redux":211}],228:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40344,7 +40399,7 @@ var Acid = function () {
 
 exports.default = Acid;
 
-},{}],227:[function(require,module,exports){
+},{}],229:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40400,7 +40455,7 @@ var DrumKit = function () {
 
 exports.default = DrumKit;
 
-},{"./hihat":228,"./kick":229,"./snare":230}],228:[function(require,module,exports){
+},{"./hihat":230,"./kick":231,"./snare":232}],230:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40463,7 +40518,7 @@ var Hihat = function () {
 
 exports.default = Hihat;
 
-},{}],229:[function(require,module,exports){
+},{}],231:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40515,7 +40570,7 @@ var Kick = function () {
 
 exports.default = Kick;
 
-},{}],230:[function(require,module,exports){
+},{}],232:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

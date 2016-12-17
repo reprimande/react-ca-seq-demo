@@ -42,6 +42,7 @@ class Sequencer {
   process() {
     this.step = (this.step + 1) % this.length
     this.actions.process()
+    this.actions.step(this.step)
     // TODO timing
     // TODO management instruments
     const tracks = [
