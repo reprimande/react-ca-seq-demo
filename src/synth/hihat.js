@@ -1,7 +1,8 @@
 export default class Hihat {
-  constructor(ctx) {
+  constructor(ctx, decay = 0.15) {
     const t = ctx.currentTime
     this._ctx = ctx
+    this.decay = decay
   }
 
   play() {
@@ -24,8 +25,6 @@ export default class Hihat {
     this._gain.gain.value = 0
     this._filter.connect(this._gain)
 
-    this._decay = 0.05
-
     this._gain.connect(this._ctx.destination)
 
     const t = this._ctx.currentTime
@@ -35,9 +34,9 @@ export default class Hihat {
     this._gain.gain.cancelScheduledValues(0)
     this._gain.gain.setValueAtTime(0, t)
     this._gain.gain.linearRampToValueAtTime(1, t)
-    this._gain.gain.exponentialRampToValueAtTime(1, t + this._decay)
+    this._gain.gain.exponentialRampToValueAtTime(0.001, t + this.decay)
 
-    this._noise.stop(t + this._decay)
+    this._noise.stop(t + this.decay)
   }
 }
 

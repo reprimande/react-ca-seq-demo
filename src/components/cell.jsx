@@ -14,29 +14,32 @@ class Cell extends Component {
   }
 
   render() {
-    const colors = ['white', 'blue']
-    const cellStyle = {
-      backgroundColor: colors[this.props.cell],
-      borderStyle: "none",
-      //borderWidth: "1px",
-      padding: "0px",
-      margin: "0px",
-      position: 'relative'
-    }
-    const focusStyle = {
-      position: 'absolute',
-      backgroundColor: 'red',
-      opacity: '0.3',
-      borderStyle: "none",
-      padding: "0px",
-      margin: "0px",
-      zIndex: '999',
-      top: '0px',
-      left: '0px',
-      display: 'inline-block',
-      width: '100%',
-      height: '100%'
-    }
+    const colors = ['white', 'blue'],
+          cellSize = '24px',
+          cellStyle = {
+            backgroundColor: colors[this.props.cell],
+            borderStyle: "none",
+            //borderWidth: "1px",
+            padding: "0px",
+            margin: "0px",
+            width: cellSize,
+            height: cellSize,
+            position: 'relative'
+          },
+          focusStyle = {
+            position: 'absolute',
+            backgroundColor: 'yellow',
+            opacity: '0.3',
+            borderStyle: "none",
+            padding: "0px",
+            margin: "0px",
+            zIndex: '999',
+            top: '0px',
+            left: '0px',
+            display: 'inline-block',
+            width: cellSize,
+            height: cellSize
+          }
     let focus = ""
     if (this.props.stepX === this.props.x) {
       focus = (<div style={focusStyle}></div>)

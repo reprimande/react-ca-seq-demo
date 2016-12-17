@@ -6,10 +6,29 @@ import Board from '../components/board.jsx'
 import Controller from '../components/controller.jsx'
 import * as Actions from '../actions'
 
+const rowLabels = [
+  'Synth C',
+  'Synth B',
+  'Synth A',
+  'Synth G',
+  'Synth F',
+  'Synth E',
+  'Synth D',
+  'Synth C',
+  'Open Hihat',
+  'Open Hihat',
+  'Close Hihat',
+  'Close Hihat',
+  'Snare',
+  'Snare',
+  'Kick',
+  'Kick'
+]
+
 const App = ({cells, sequencer, actions}) => (
   <div>
     <Controller actions={actions} />
-    <Board cells={cells} sequencer={sequencer} actions={actions} />
+    <Board cells={cells} sequencer={sequencer} actions={actions} rowLabels={rowLabels}/>
   </div>
 )
 

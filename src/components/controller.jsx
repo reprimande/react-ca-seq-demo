@@ -6,11 +6,11 @@ class Controller extends Component {
   }
 
   handleClickStart() {
-
+    this.props.actions.start()
   }
 
   handleClickStop() {
-
+    this.props.actions.stop()
   }
 
   handleClickClear() {

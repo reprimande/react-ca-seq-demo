@@ -3,7 +3,7 @@ export default class Snare {
     const t = ctx.currentTime
 
     this._ctx = ctx
-
+    this._decay = 0.4
   }
 
   play() {
@@ -18,8 +18,10 @@ export default class Snare {
       return buf;
     })(this._ctx)
     this._filter = this._ctx.createBiquadFilter();
-    this._filter.type = 'highpass';
-    this._filter.frequency.value = 1000;
+    this._filter.type = 'bandpass';
+    this._filter.frequency.value = 1200;
+    this._filter.Q.value= 2;
+
     this._noise.connect(this._filter);
     this._gain = this._ctx.createGain()
     this._gain.gain.value = 0
@@ -29,9 +31,7 @@ export default class Snare {
     this._osc.type = 'triangle'
     this._oscGain = this._ctx.createGain()
     this._oscGain.gain.value = 0
-    this._osc.connect(this._oscGain)
-
-    this._decay = 0.05
+    //this._osc.connect(this._oscGain)
 
     this._gain.connect(this._ctx.destination)
     this._oscGain.connect(this._ctx.destination)
@@ -48,7 +48,7 @@ export default class Snare {
     this._gain.gain.cancelScheduledValues(0)
     this._gain.gain.setValueAtTime(0, t)
     this._gain.gain.linearRampToValueAtTime(1, t)
-    this._gain.gain.exponentialRampToValueAtTime(1, t + this._decay)
+    this._gain.gain.exponentialRampToValueAtTime(0.0001, t + this._decay)
 
     this._oscGain.gain.cancelScheduledValues(0)
     this._oscGain.gain.setValueAtTime(0, t)

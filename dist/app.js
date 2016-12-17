@@ -39592,7 +39592,7 @@ function symbolObservablePonyfill(root) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.step = exports.clearAll = exports.randomAll = exports.updateCell = exports.process = undefined;
+exports.start = exports.stop = exports.step = exports.clearAll = exports.randomAll = exports.updateCell = exports.process = undefined;
 
 var _ActionTypes = require('../constants/ActionTypes');
 
@@ -39612,8 +39612,15 @@ var randomAll = exports.randomAll = function randomAll() {
 var clearAll = exports.clearAll = function clearAll() {
   return { type: types.CLEAR_ALL };
 };
+
 var step = exports.step = function step(_step) {
   return { type: types.STEP, step: _step };
+};
+var stop = exports.stop = function stop() {
+  return { type: types.STOP, step: step };
+};
+var start = exports.start = function start() {
+  return { type: types.START, step: step };
 };
 
 },{"../constants/ActionTypes":222}],217:[function(require,module,exports){
@@ -39712,13 +39719,18 @@ var Board = function (_Component) {
         backgroundColor: "#afeeee",
         borderStyle: "none",
         borderWidth: "1px",
-        width: "256px",
-        height: "256px",
+        //width: "256px",
+        //height: "256px",
         padding: "0px",
         margin: "0px"
       };
       var rows = this.props.cells.map(function (row, i) {
-        return _react2.default.createElement(_row2.default, { row: row, y: i, stepX: _this2.props.sequencer.step, onCellClick: function onCellClick(x, y) {
+        return _react2.default.createElement(_row2.default, {
+          row: row,
+          y: i,
+          stepX: _this2.props.sequencer.step,
+          label: _this2.props.rowLabels[i],
+          onCellClick: function onCellClick(x, y) {
             return _this2.handleCellClick(x, y);
           } });
       });
@@ -39736,7 +39748,8 @@ var Board = function (_Component) {
 Board.propTypes = {
   cells: _react.PropTypes.array.isRequired,
   sequencer: _react.PropTypes.object.isRequired,
-  actions: _react.PropTypes.object.isRequired
+  actions: _react.PropTypes.object.isRequired,
+  rowLabels: _react.PropTypes.array
 };
 exports.default = Board;
 
@@ -39780,18 +39793,21 @@ var Cell = function (_Component) {
     value: function render() {
       var _this2 = this;
 
-      var colors = ['white', 'blue'];
-      var cellStyle = {
+      var colors = ['white', 'blue'],
+          cellSize = '24px',
+          cellStyle = {
         backgroundColor: colors[this.props.cell],
         borderStyle: "none",
         //borderWidth: "1px",
         padding: "0px",
         margin: "0px",
+        width: cellSize,
+        height: cellSize,
         position: 'relative'
-      };
-      var focusStyle = {
+      },
+          focusStyle = {
         position: 'absolute',
-        backgroundColor: 'red',
+        backgroundColor: 'yellow',
         opacity: '0.3',
         borderStyle: "none",
         padding: "0px",
@@ -39800,8 +39816,8 @@ var Cell = function (_Component) {
         top: '0px',
         left: '0px',
         display: 'inline-block',
-        width: '100%',
-        height: '100%'
+        width: cellSize,
+        height: cellSize
       };
       var focus = "";
       if (this.props.stepX === this.props.x) {
@@ -39861,10 +39877,14 @@ var Controller = function (_Component) {
 
   _createClass(Controller, [{
     key: 'handleClickStart',
-    value: function handleClickStart() {}
+    value: function handleClickStart() {
+      this.props.actions.start();
+    }
   }, {
     key: 'handleClickStop',
-    value: function handleClickStop() {}
+    value: function handleClickStop() {
+      this.props.actions.stop();
+    }
   }, {
     key: 'handleClickClear',
     value: function handleClickClear() {
@@ -39967,11 +39987,27 @@ var Row = function (_Component) {
     value: function render() {
       var _this2 = this;
 
+      var labelStyle = {
+        backgroundColor: 'white',
+        borderStyle: "none",
+        padding: "3px",
+        margin: "0px",
+        width: '80px',
+        fontSize: '10px',
+        textAlign: 'right'
+      };
+
       var cells = this.props.row.map(function (cell, i) {
         return _react2.default.createElement(_cell2.default, { cell: cell, x: i, y: _this2.props.y, stepX: _this2.props.stepX, onCellClick: function onCellClick(x, y) {
             return _this2.handleCellClick(x, y);
           } });
-      });
+      }),
+          label = this.props.label ? _react2.default.createElement(
+        'th',
+        { style: labelStyle },
+        this.props.label
+      ) : '';
+      cells.push(label);
       return _react2.default.createElement(
         'tr',
         null,
@@ -39987,7 +40023,8 @@ Row.propTypes = {
   row: _react.PropTypes.array.isRequired,
   y: _react.PropTypes.number.isRequired,
   stepX: _react.PropTypes.number,
-  onCellClick: _react.PropTypes.func
+  onCellClick: _react.PropTypes.func,
+  label: _react.PropTypes.string
 };
 exports.default = Row;
 
@@ -40002,7 +40039,10 @@ var UPDATE_CELL = exports.UPDATE_CELL = 'UPDATE_CELL';
 var RANDOM_ALL = exports.RANDOM_ALL = 'RANDOM_ALL';
 var SET_ALL = exports.SET_ALL = 'SET_ALL';
 var CLEAR_ALL = exports.CLEAR_ALL = 'CLEAR_ALL';
+
 var STEP = exports.STEP = 'STEP';
+var STOP = exports.STOP = 'STOP';
+var START = exports.START = 'START';
 
 },{}],223:[function(require,module,exports){
 'use strict';
@@ -40035,6 +40075,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var rowLabels = ['Synth C', 'Synth B', 'Synth A', 'Synth G', 'Synth F', 'Synth E', 'Synth D', 'Synth C', 'Open Hihat', 'Open Hihat', 'Close Hihat', 'Close Hihat', 'Snare', 'Snare', 'Kick', 'Kick'];
+
 var App = function App(_ref) {
   var cells = _ref.cells,
       sequencer = _ref.sequencer,
@@ -40043,7 +40085,7 @@ var App = function App(_ref) {
     'div',
     null,
     _react2.default.createElement(_controller2.default, { actions: actions }),
-    _react2.default.createElement(_board2.default, { cells: cells, sequencer: sequencer, actions: actions })
+    _react2.default.createElement(_board2.default, { cells: cells, sequencer: sequencer, actions: actions, rowLabels: rowLabels })
   );
 };
 
@@ -40155,7 +40197,7 @@ var toggleValue = function toggleValue(val) {
 
 var updateCell = function updateCell(cells, x, y) {
   cells[y][x] = toggleValue(cells[y][x]);
-  return cells;
+  return Object.assign([], cells);
 };
 
 var clearAll = function clearAll(cells) {
@@ -40199,12 +40241,16 @@ Object.defineProperty(exports, "__esModule", {
 var _ActionTypes = require('../constants/ActionTypes');
 
 var sequencer = function sequencer() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { step: 0 };
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { step: 0, running: true };
   var action = arguments[1];
 
   switch (action.type) {
     case _ActionTypes.STEP:
-      return { step: action.step };
+      return { step: action.step, running: state.running };
+    case _ActionTypes.STOP:
+      return { step: state.step, running: false };
+    case _ActionTypes.START:
+      return { step: state.step, running: true };
     default:
       return state;
   }
@@ -40268,6 +40314,11 @@ var Sequencer = function () {
 
     store.subscribe(function () {
       _this.state = store.getState();
+      if (_this.state.sequencer.running) {
+        _this.start();
+      } else {
+        _this.stop();
+      }
     });
   }
 
@@ -40303,21 +40354,20 @@ var Sequencer = function () {
       this.actions.step(this.step);
       // TODO timing
       // TODO management instruments
-      var tracks = [{ s: this.bass, args: [12 + 36] }, { s: this.bass, args: [11 + 36] }, { s: this.bass, args: [9 + 36] }, { s: this.bass, args: [7 + 36] }, { s: this.bass, args: [5 + 36] }, { s: this.bass, args: [4 + 36] }, { s: this.bass, args: [2 + 36] }, { s: this.bass, args: [0 + 36] }, { s: this.drumkit.hihat, args: [] }, { s: this.drumkit.hihat, args: [] }, { s: this.drumkit.hihat, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }];
+      var tracks = [{ s: this.bass, args: [12 + 60] }, { s: this.bass, args: [11 + 60] }, { s: this.bass, args: [9 + 60] }, { s: this.bass, args: [7 + 60] }, { s: this.bass, args: [5 + 60] }, { s: this.bass, args: [4 + 60] }, { s: this.bass, args: [2 + 60] }, { s: this.bass, args: [0 + 60] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.oh, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.ch, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.snare, args: [] }, { s: this.drumkit.kick, args: [] }, { s: this.drumkit.kick, args: [] }];
 
       var currents = _lodash2.default.flatten(this.state.cells.map(function (row) {
         return row.filter(function (_, x) {
           return x === _this3.step;
         });
       }));
-      var activeTracks = currents.map(function (v, i) {
+      currents.map(function (v, i) {
         var track = tracks[i];
         track.active = v === 1 ? true : false;
         return track;
       }).filter(function (t) {
         return t.active;
-      });
-      _lodash2.default.uniqBy(activeTracks, 's').forEach(function (t) {
+      }).forEach(function (t) {
         var _t$s;
 
         (_t$s = t.s).play.apply(_t$s, _toConsumableArray(t.args));
@@ -40348,11 +40398,11 @@ var Acid = function () {
     var t = ctx.currentTime;
 
     this._ctx = ctx;
-    this._decay = 0.1;
+    this._decay = 0.5;
     this._filter = this._ctx.createBiquadFilter();
     this._filter.type = 'lowpass';
-    this._filter.frequency.value = 1000;
-    this._filter.Q.value = 20;
+    this._filter.frequency.value = 2000;
+    this._filter.Q.value = 10;
 
     this._gain = this._ctx.createGain();
     this._gain.gain.value = 0;
@@ -40381,13 +40431,13 @@ var Acid = function () {
 
       this._filter.frequency.cancelScheduledValues(0);
       this._filter.frequency.setValueAtTime(0, t);
-      this._filter.frequency.linearRampToValueAtTime(3000, t);
-      this._filter.frequency.exponentialRampToValueAtTime(1000, t + this._decay);
+      this._filter.frequency.linearRampToValueAtTime(4000, t);
+      this._filter.frequency.exponentialRampToValueAtTime(1000, t + this._decay / 2);
 
       this._gain.gain.cancelScheduledValues(0);
       this._gain.gain.setValueAtTime(0, t);
-      this._gain.gain.linearRampToValueAtTime(1, t);
-      this._gain.gain.exponentialRampToValueAtTime(1, t + this._decay);
+      this._gain.gain.linearRampToValueAtTime(0.2, t);
+      this._gain.gain.exponentialRampToValueAtTime(0.0001, t + this._decay);
 
       this._osc.start(t);
       this._osc.stop(t + this._decay);
@@ -40430,7 +40480,8 @@ var DrumKit = function () {
 
     this._kick = new _kick2.default(ctx);
     this._snare = new _snare2.default(ctx);
-    this._hihat = new _hihat2.default(ctx);
+    this._ch = new _hihat2.default(ctx);
+    this._oh = new _hihat2.default(ctx, 0.3);
   }
 
   _createClass(DrumKit, [{
@@ -40444,9 +40495,14 @@ var DrumKit = function () {
       return this._snare;
     }
   }, {
-    key: 'hihat',
+    key: 'ch',
     get: function get() {
-      return this._hihat;
+      return this._ch;
+    }
+  }, {
+    key: 'oh',
+    get: function get() {
+      return this._oh;
     }
   }]);
 
@@ -40468,10 +40524,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Hihat = function () {
   function Hihat(ctx) {
+    var decay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0.15;
+
     _classCallCheck(this, Hihat);
 
     var t = ctx.currentTime;
     this._ctx = ctx;
+    this.decay = decay;
   }
 
   _createClass(Hihat, [{
@@ -40496,8 +40555,6 @@ var Hihat = function () {
       this._gain.gain.value = 0;
       this._filter.connect(this._gain);
 
-      this._decay = 0.05;
-
       this._gain.connect(this._ctx.destination);
 
       var t = this._ctx.currentTime;
@@ -40507,9 +40564,9 @@ var Hihat = function () {
       this._gain.gain.cancelScheduledValues(0);
       this._gain.gain.setValueAtTime(0, t);
       this._gain.gain.linearRampToValueAtTime(1, t);
-      this._gain.gain.exponentialRampToValueAtTime(1, t + this._decay);
+      this._gain.gain.exponentialRampToValueAtTime(0.001, t + this.decay);
 
-      this._noise.stop(t + this._decay);
+      this._noise.stop(t + this.decay);
     }
   }]);
 
@@ -40519,7 +40576,7 @@ var Hihat = function () {
 exports.default = Hihat;
 
 },{}],231:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -40536,8 +40593,8 @@ var Kick = function () {
     var t = ctx.currentTime;
 
     this._ctx = ctx;
-    this._decay = 0.1;
-    this._hi = 300;
+    this._decay = 0.2;
+    this._hi = 220;
     this._lo = 20;
 
     this._gain = this._ctx.createGain();
@@ -40548,10 +40605,11 @@ var Kick = function () {
   }
 
   _createClass(Kick, [{
-    key: "play",
+    key: 'play',
     value: function play() {
       var t = this._ctx.currentTime;
       this._osc = this._ctx.createOscillator();
+      this._osc.type = 'triangle';
 
       this._osc.connect(this._gain);
       this._osc.frequency.setValueAtTime(this._hi, t);
@@ -40559,7 +40617,7 @@ var Kick = function () {
       this._gain.gain.cancelScheduledValues(0);
       this._gain.gain.setValueAtTime(0, t);
       this._gain.gain.linearRampToValueAtTime(1, t);
-      this._gain.gain.exponentialRampToValueAtTime(1, t + this._decay);
+      this._gain.gain.exponentialRampToValueAtTime(0.0001, t + this._decay);
       this._osc.start(t);
       this._osc.stop(t + this._decay);
     }
@@ -40588,6 +40646,7 @@ var Snare = function () {
     var t = ctx.currentTime;
 
     this._ctx = ctx;
+    this._decay = 0.4;
   }
 
   _createClass(Snare, [{
@@ -40604,8 +40663,10 @@ var Snare = function () {
         return buf;
       }(this._ctx);
       this._filter = this._ctx.createBiquadFilter();
-      this._filter.type = 'highpass';
-      this._filter.frequency.value = 1000;
+      this._filter.type = 'bandpass';
+      this._filter.frequency.value = 1200;
+      this._filter.Q.value = 2;
+
       this._noise.connect(this._filter);
       this._gain = this._ctx.createGain();
       this._gain.gain.value = 0;
@@ -40615,9 +40676,7 @@ var Snare = function () {
       this._osc.type = 'triangle';
       this._oscGain = this._ctx.createGain();
       this._oscGain.gain.value = 0;
-      this._osc.connect(this._oscGain);
-
-      this._decay = 0.05;
+      //this._osc.connect(this._oscGain)
 
       this._gain.connect(this._ctx.destination);
       this._oscGain.connect(this._ctx.destination);
@@ -40633,7 +40692,7 @@ var Snare = function () {
       this._gain.gain.cancelScheduledValues(0);
       this._gain.gain.setValueAtTime(0, t);
       this._gain.gain.linearRampToValueAtTime(1, t);
-      this._gain.gain.exponentialRampToValueAtTime(1, t + this._decay);
+      this._gain.gain.exponentialRampToValueAtTime(0.0001, t + this._decay);
 
       this._oscGain.gain.cancelScheduledValues(0);
       this._oscGain.gain.setValueAtTime(0, t);

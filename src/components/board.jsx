@@ -5,7 +5,8 @@ class Board extends Component {
   static propTypes = {
     cells: PropTypes.array.isRequired,
     sequencer: PropTypes.object.isRequired,
-    actions: PropTypes.object.isRequired
+    actions: PropTypes.object.isRequired,
+    rowLabels: PropTypes.array
   }
 
   handleCellClick(x, y) {
@@ -17,13 +18,19 @@ class Board extends Component {
       backgroundColor: "#afeeee",
       borderStyle: "none",
       borderWidth: "1px",
-      width: "256px",
-      height: "256px",
+      //width: "256px",
+      //height: "256px",
       padding: "0px",
       margin: "0px"
     }
     const rows = this.props.cells.map((row, i) => {
-      return (<Row row={row} y={i} stepX={this.props.sequencer.step} onCellClick={(x, y) => this.handleCellClick(x, y)}/>)
+      return (
+        <Row
+            row={row}
+            y={i}
+            stepX={this.props.sequencer.step}
+            label={this.props.rowLabels[i]}
+            onCellClick={(x, y) => this.handleCellClick(x, y)}/>)
     })
     return (
       <table style={ style }>

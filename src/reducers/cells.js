@@ -74,10 +74,10 @@ const toggleValue = (val) => { return val ^ 1 }
 
 const updateCell = (cells, x, y) => {
   cells[y][x] = toggleValue(cells[y][x])
-  return cells
+  return Object.assign([], cells)
 }
 
-const clearAll = (cells) => {
+const clearAll = (cells) => { 
   return cells.map((r) => { return r.map((_) => { return 0 }) })
 }
 

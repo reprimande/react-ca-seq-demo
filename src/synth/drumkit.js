@@ -6,7 +6,8 @@ class DrumKit {
   constructor(ctx) {
     this._kick = new Kick(ctx)
     this._snare = new Snare(ctx)
-    this._hihat = new Hihat(ctx)
+    this._ch = new Hihat(ctx)
+    this._oh = new Hihat(ctx, 0.3)
   }
 
   get kick() {
@@ -17,8 +18,12 @@ class DrumKit {
     return this._snare
   }
 
-  get hihat() {
-    return this._hihat
+  get ch() {
+    return this._ch
+  }
+
+  get oh() {
+    return this._oh
   }
 }
 
