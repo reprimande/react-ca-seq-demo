@@ -3473,6 +3473,10 @@ watchify@^3.7.0:
     through2 "^2.0.0"
     xtend "^4.0.0"
 
+web-audio-scheduler:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/web-audio-scheduler/-/web-audio-scheduler-1.3.0.tgz#6a79e27934102deabd8fca2449e7530c6ec0831c"
+
 weinre@^2.0.0-pre-I0Z7U9OV:
   version "2.0.0-pre-I0Z7U9OV"
   resolved "https://registry.yarnpkg.com/weinre/-/weinre-2.0.0-pre-I0Z7U9OV.tgz#fef8aa223921f7b40bbbbd4c3ed4302f6fd0a813"

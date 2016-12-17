@@ -1,5 +1,6 @@
 import { createStore, bindActionCreators } from 'redux'
 import _ from 'lodash'
+import WebAudioScheduler from 'web-audio-scheduler'
 
 import cells from './reducers'
 import * as Actions from './actions'
@@ -18,6 +19,10 @@ class Sequencer {
     this.drumkit = new DrumKit(ctx)
     this.bass = new Acid(ctx)
 
+    this.sched = new WebAudioScheduler({ context: ctx });
+
+    this.process = this.process.bind(this)
+
     store.subscribe(() => {
       this.state = store.getState()
       if (this.state.sequencer.running) {
@@ -25,26 +30,25 @@ class Sequencer {
       } else {
         this.stop()
       }
+      this.bpm = this.state.sequencer.bpm
     });
   }
 
   start() {
-    if (!this.isActive) {
-      this.step = 0
-      this.t = setInterval(() => { this.process() }, 100)
-      this.isActive = true
+    if (this.sched.state === 'suspended') {
+      this.sched.start(this.process)
     }
   }
 
   stop() {
-    if (this.isActive) {
-      clearInterval(this.t)
-      this.step = 0
-      this.isActive = false
+    if (this.sched.state === 'running') {
+      this.sched.stop()
     }
   }
 
-  process() {
+  process(e) {
+    const t = e.playbackTime;
+
     this.step = (this.step + 1) % this.length
     this.actions.process()
     this.actions.step(this.step)
@@ -81,6 +85,8 @@ class Sequencer {
     }).forEach((t) => {
       t.s.play(...t.args)
     })
+
+    this.sched.insert(t + (1 / this.bpm * 16), this.process);
   }
 }
 

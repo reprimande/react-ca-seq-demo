@@ -19,7 +19,8 @@
     "react-dom": "^15.4.0",
     "react-redux": "^5.0.1",
     "redux": "^3.6.0",
-    "sleep-async": "^1.0.1"
+    "sleep-async": "^1.0.1",
+    "web-audio-scheduler": "^1.3.0"
   },
   "devDependencies": {
     "babel-plugin-transform-react-jsx": "^6.8.0",

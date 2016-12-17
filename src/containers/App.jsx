@@ -27,7 +27,8 @@ const rowLabels = [
 
 const App = ({cells, sequencer, actions}) => (
   <div>
-    <Controller actions={actions} />
+    <h1>React/Redux Cellular Automaton Sequencer</h1>
+    <Controller actions={actions} bpm={sequencer.bpm} />
     <Board cells={cells} sequencer={sequencer} actions={actions} rowLabels={rowLabels}/>
   </div>
 )
