@@ -26,10 +26,19 @@ class Row extends Component {
     }
 
     const cells = this.props.row.map((cell, i) => {
-      return <Cell cell={cell} x={i} y={this.props.y} stepX={this.props.stepX} onCellClick={(x, y) => this.handleCellClick(x, y)}/>
-    }),
-          label = this.props.label ? (<th style={labelStyle}>{this.props.label}</th>) : ''
-    cells.push(label)
+      return (
+        <Cell
+            key={i}
+            cell={cell}
+            x={i}
+            y={this.props.y}
+            stepX={this.props.stepX}
+            onCellClick={(x, y) => this.handleCellClick(x, y)}/>
+      )})
+
+    if (this.props.label) {
+      cells.push((<th key={'label_' + this.props.y} style={labelStyle}>{this.props.label}</th>))
+    }
     return (<tr>{cells}</tr>)
   }
 }

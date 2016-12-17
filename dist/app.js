@@ -40237,6 +40237,7 @@ var Board = function (_Component) {
       };
       var rows = this.props.cells.map(function (row, i) {
         return _react2.default.createElement(_row2.default, {
+          key: i,
           row: row,
           y: i,
           stepX: _this2.props.sequencer.step,
@@ -40248,7 +40249,11 @@ var Board = function (_Component) {
       return _react2.default.createElement(
         'table',
         { style: style },
-        rows
+        _react2.default.createElement(
+          'tbody',
+          null,
+          rows
+        )
       );
     }
   }]);
@@ -40541,16 +40546,24 @@ var Row = function (_Component) {
       };
 
       var cells = this.props.row.map(function (cell, i) {
-        return _react2.default.createElement(_cell2.default, { cell: cell, x: i, y: _this2.props.y, stepX: _this2.props.stepX, onCellClick: function onCellClick(x, y) {
+        return _react2.default.createElement(_cell2.default, {
+          key: i,
+          cell: cell,
+          x: i,
+          y: _this2.props.y,
+          stepX: _this2.props.stepX,
+          onCellClick: function onCellClick(x, y) {
             return _this2.handleCellClick(x, y);
           } });
-      }),
-          label = this.props.label ? _react2.default.createElement(
-        'th',
-        { style: labelStyle },
-        this.props.label
-      ) : '';
-      cells.push(label);
+      });
+
+      if (this.props.label) {
+        cells.push(_react2.default.createElement(
+          'th',
+          { key: 'label_' + this.props.y, style: labelStyle },
+          this.props.label
+        ));
+      }
       return _react2.default.createElement(
         'tr',
         null,

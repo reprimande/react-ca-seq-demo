@@ -26,6 +26,7 @@ class Board extends Component {
     const rows = this.props.cells.map((row, i) => {
       return (
         <Row
+            key={i}
             row={row}
             y={i}
             stepX={this.props.sequencer.step}
@@ -34,7 +35,9 @@ class Board extends Component {
     })
     return (
       <table style={ style }>
-        {rows}
+        <tbody>
+          {rows}
+        </tbody>
       </table>
     )
   }
