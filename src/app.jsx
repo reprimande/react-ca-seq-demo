@@ -1,19 +1,29 @@
 import _ from 'lodash'
 import React from 'react'
 import { render } from 'react-dom'
-import { createStore } from 'redux'
+import { createStore, bindActionCreators } from 'redux'
 import { Provider } from 'react-redux'
 
 import App from './containers/App.jsx'
+import Timer from './containers/Timer'
+import Sequencer from './containers/Sequencer'
+
 import cells from './reducers'
 import * as Actions from './actions'
 
-import Sequencer from './sequencer'
-
-window.AudioContext = window.AudioContext || window.webkitAudioContext;
+window.AudioContext = window.AudioContext || window.webkitAudioContext
 
 const store = createStore(cells),
-      sequencer = new Sequencer(new AudioContext(), store, 16)
+      actions = bindActionCreators(Actions, store.dispatch),
+      ctx = new AudioContext(),
+      timer = new Timer(ctx, actions),
+      sequencer = new Sequencer(ctx, actions)
+
+store.subscribe(() => {
+  const state = store.getState()
+  timer.setState(state)
+  sequencer.setState(state)
+})
 
 render(
   <Provider store={store}>

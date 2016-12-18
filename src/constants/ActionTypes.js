@@ -8,3 +8,5 @@ export const STEP = 'STEP'
 export const STOP = 'STOP'
 export const START = 'START'
 export const BPM = 'BPM'
+
+export const TRIGGER_ALL = 'TRIGGER_ALL'

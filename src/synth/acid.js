@@ -12,7 +12,10 @@ class Acid {
     this.gain = this.ctx.createGain()
     this.gain.gain.value = 0
     this.filter.connect(this.gain)
-    this.gain.connect(this.ctx.destination)
+  }
+
+  connect(node) {
+    this.gain.connect(node)
   }
 
   play(note = 24) {
@@ -34,7 +37,6 @@ class Acid {
     this.gain.gain.setValueAtTime(0, t)
     this.gain.gain.linearRampToValueAtTime(0.1, t)
     this.gain.gain.exponentialRampToValueAtTime(0.0001, t + this.decay)
-
   }
 }
 

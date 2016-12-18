@@ -31,6 +31,7 @@ class Board extends Component {
             y={i}
             stepX={this.props.sequencer.step}
             label={this.props.rowLabels[i]}
+            trigger={this.props.sequencer.triggers[i]}
             onCellClick={(x, y) => this.handleCellClick(x, y)}/>)
     })
     return (

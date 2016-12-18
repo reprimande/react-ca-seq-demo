@@ -14,9 +14,12 @@ export default class Snare {
     this.gain.gain.value = 0
 
     this.filter.connect(this.gain)
-    this.gain.connect(this.ctx.destination)
 
     this.noiseBuffer = createNoiseBuffer(ctx)
+  }
+
+  connect(node) {
+    this.gain.connect(node)
   }
 
   play() {

@@ -5,6 +5,7 @@ class Row extends Component {
   static propTypes = {
     row: PropTypes.array.isRequired,
     y:  PropTypes.number.isRequired,
+    trigger:  PropTypes.number.isRequired,
     stepX:  PropTypes.number,
     onCellClick: PropTypes.func,
     label: PropTypes.string
@@ -16,13 +17,13 @@ class Row extends Component {
 
   render() {
     const labelStyle = {
-      backgroundColor: 'white',
+      backgroundColor: ['white', 'yellow'][this.props.trigger],
       borderStyle: "none",
       padding: "3px",
       margin: "0px",
       width: '80px',
       fontSize: '10px',
-      textAlign: 'right'
+      textAlign: 'right',
     }
 
     const cells = this.props.row.map((cell, i) => {
@@ -44,3 +45,31 @@ class Row extends Component {
 }
 
 export default Row
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -9,3 +9,5 @@ export const step = (step) => ({ type: types.STEP, step })
 export const stop = () => ({ type: types.STOP, step })
 export const start = () => ({ type: types.START, step })
 export const bpm = (bpm) => ({ type: types.BPM, bpm })
+
+export const triggerAll = (triggers) => ({ type: types.TRIGGER_ALL, triggers })

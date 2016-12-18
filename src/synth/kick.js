@@ -7,7 +7,10 @@ export default class Kick {
     this.lo = 40
     this.gain = this.ctx.createGain()
     this.gain.gain.value = 0
-    this.gain.connect(this.ctx.destination)
+  }
+
+  connect(node) {
+    this.gain.connect(node)
   }
 
   play() {
