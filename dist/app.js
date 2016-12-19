@@ -40169,7 +40169,7 @@ if (global === global.window && global.URL && global.Blob && global.Worker) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.triggerAll = exports.bpm = exports.start = exports.stop = exports.step = exports.clearAll = exports.randomAll = exports.updateCell = exports.process = undefined;
+exports.triggerEnd = exports.triggerAll = exports.bpm = exports.start = exports.stop = exports.step = exports.clearAll = exports.randomAll = exports.updateCell = exports.process = undefined;
 
 var _ActionTypes = require('../constants/ActionTypes');
 
@@ -40206,6 +40206,9 @@ var bpm = exports.bpm = function bpm(_bpm) {
 var triggerAll = exports.triggerAll = function triggerAll(triggers) {
   return { type: types.TRIGGER_ALL, triggers: triggers };
 };
+var triggerEnd = exports.triggerEnd = function triggerEnd() {
+  return { type: types.TRIGGER_END };
+};
 
 },{"../constants/ActionTypes":229}],224:[function(require,module,exports){
 'use strict';
@@ -40236,6 +40239,10 @@ var _Sequencer = require('./containers/Sequencer');
 
 var _Sequencer2 = _interopRequireDefault(_Sequencer);
 
+var _Track = require('./containers/Track');
+
+var _Track2 = _interopRequireDefault(_Track);
+
 var _reducers = require('./reducers');
 
 var _reducers2 = _interopRequireDefault(_reducers);
@@ -40254,12 +40261,14 @@ var store = (0, _redux.createStore)(_reducers2.default),
     actions = (0, _redux.bindActionCreators)(Actions, store.dispatch),
     ctx = new AudioContext(),
     timer = new _Timer2.default(ctx, actions),
-    sequencer = new _Sequencer2.default(ctx, actions);
+    sequencer = new _Sequencer2.default(actions),
+    track = new _Track2.default(ctx, actions);
 
 store.subscribe(function () {
   var state = store.getState();
   timer.setState(state);
   sequencer.setState(state);
+  track.setState(state);
 });
 
 (0, _reactDom.render)(_react2.default.createElement(
@@ -40268,7 +40277,7 @@ store.subscribe(function () {
   _react2.default.createElement(_App2.default, null)
 ), document.getElementById('c'));
 
-},{"./actions":223,"./containers/App.jsx":230,"./containers/Sequencer":231,"./containers/Timer":232,"./reducers":236,"lodash":37,"react":206,"react-dom":40,"react-redux":176,"redux":212}],225:[function(require,module,exports){
+},{"./actions":223,"./containers/App.jsx":230,"./containers/Sequencer":231,"./containers/Timer":232,"./containers/Track":233,"./reducers":236,"lodash":37,"react":206,"react-dom":40,"react-redux":176,"redux":212}],225:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40690,6 +40699,7 @@ var START = exports.START = 'START';
 var BPM = exports.BPM = 'BPM';
 
 var TRIGGER_ALL = exports.TRIGGER_ALL = 'TRIGGER_ALL';
+var TRIGGER_END = exports.TRIGGER_END = 'TRIGGER_END';
 
 },{}],230:[function(require,module,exports){
 'use strict';
@@ -40777,41 +40787,35 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _Track = require('./Track');
-
-var _Track2 = _interopRequireDefault(_Track);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Sequencer = function () {
-  function Sequencer(ctx, actions) {
+  function Sequencer(actions) {
     _classCallCheck(this, Sequencer);
 
-    this.track = new _Track2.default(ctx);
     this.actions = actions;
+    this.step = -1;
   }
 
   _createClass(Sequencer, [{
     key: 'setState',
     value: function setState(state) {
-      this.cells = state.cells;
       if (this.step != state.sequencer.step) {
         this.step = state.sequencer.step;
-        this.playTracks(this.step);
+        this.processStep(this.step, state.cells);
       }
     }
   }, {
-    key: 'playTracks',
-    value: function playTracks(step) {
-      var currents = _lodash2.default.flatten(this.cells.map(function (row) {
+    key: 'processStep',
+    value: function processStep(step, cells) {
+      var currents = _lodash2.default.flatten(cells.map(function (row) {
         return row.filter(function (_, x) {
           return x === step;
         });
       }));
 
-      this.track.playAll(currents);
       this.actions.triggerAll(currents);
     }
   }]);
@@ -40821,7 +40825,7 @@ var Sequencer = function () {
 
 exports.default = Sequencer;
 
-},{"./Track":233,"lodash":37}],232:[function(require,module,exports){
+},{"lodash":37}],232:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40929,6 +40933,13 @@ var Track = function () {
   }
 
   _createClass(Track, [{
+    key: 'setState',
+    value: function setState(state) {
+      if (state.sequencer.triggering) {
+        this.playAll(state.sequencer.triggers);
+      }
+    }
+  }, {
     key: 'playAll',
     value: function playAll(triggers) {
       var _this = this;
@@ -40944,6 +40955,7 @@ var Track = function () {
 
         (_track$instrument = track.instrument).play.apply(_track$instrument, _toConsumableArray(track.args));
       });
+      this.actions.triggerEnd();
     }
   }]);
 
@@ -41109,7 +41121,8 @@ var initialState = {
   running: false,
   bpm: 160,
   length: 16,
-  triggers: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  triggers: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  triggering: false
 };
 
 var sequencer = function sequencer() {
@@ -41123,16 +41136,52 @@ var sequencer = function sequencer() {
         running: state.running,
         bpm: state.bpm,
         length: state.length,
-        triggers: state.triggers
+        triggers: state.triggers,
+        triggering: false
       };
     case _ActionTypes.STOP:
-      return { step: state.step, running: false, bpm: state.bpm, length: state.length, triggers: state.triggers };
+      return {
+        step: state.step,
+        running: false,
+        bpm: state.bpm,
+        length: state.length,
+        triggers: state.triggers,
+        triggering: false
+      };
     case _ActionTypes.START:
-      return { step: state.step, running: true, bpm: state.bpm, length: state.length, triggers: state.triggers };
+      return {
+        step: state.step,
+        running: true,
+        bpm: state.bpm,
+        length: state.length,
+        triggers: state.triggers,
+        triggering: false
+      };
     case _ActionTypes.BPM:
-      return { step: state.step, running: state.running, bpm: action.bpm, length: state.length, triggers: state.triggers };
+      return {
+        step: state.step,
+        running: state.running,
+        bpm: action.bpm,
+        length: state.length,
+        triggers: state.triggers,
+        triggering: false
+      };
     case _ActionTypes.TRIGGER_ALL:
-      return { step: state.step, running: state.running, bpm: state.bpm, length: state.length, triggers: action.triggers };
+      return {
+        step: state.step,
+        running: state.running,
+        bpm: state.bpm, length: state.length,
+        triggers: action.triggers,
+        triggering: true
+      };
+    case _ActionTypes.TRIGGER_END:
+      return {
+        step: state.step,
+        running: state.running,
+        bpm: state.bpm, length: state.length,
+        triggers: state.triggers,
+        triggerring: false
+      };
     default:
       return state;
   }

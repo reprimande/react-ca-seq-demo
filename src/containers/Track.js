@@ -36,6 +36,12 @@ class Track {
     this.actions = actions
   }
 
+  setState(state) {
+    if (state.sequencer.triggering) {
+      this.playAll(state.sequencer.triggers)
+    }
+  }
+
   playAll(triggers) {
     triggers.map((v, i) => {
       const track = this.tracks[i]
@@ -46,6 +52,7 @@ class Track {
     }).forEach((track) => {
       track.instrument.play(...track.args)
     })
+    this.actions.triggerEnd()
   }
 }
 
